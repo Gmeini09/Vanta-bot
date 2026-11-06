@@ -13,6 +13,7 @@ function envDefaults() {
     autoRoleId: config.autoRoleId,
     verifiedRoleId: process.env.VERIFIED_ROLE_ID || '',
     ticketCategoryId: config.tickets.categoryId,
+    purchaseTicketCategoryId: process.env.PURCHASE_TICKET_CATEGORY_ID || '',
     ticketSupportRoleId: config.tickets.supportRoleId,
     ticketLogChannelId: config.tickets.logChannelId,
   };

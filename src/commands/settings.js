@@ -10,6 +10,7 @@ const CHANNEL_KEYS = {
   modLogChannelId: 'Mod-log channel',
   ticketLogChannelId: 'Ticket log channel',
   ticketCategoryId: 'Ticket category',
+  purchaseTicketCategoryId: 'Purchase ticket category',
 };
 const ROLE_KEYS = {
   autoRoleId: 'Auto-role (new members)',
@@ -59,7 +60,7 @@ module.exports = {
     if (sub === 'channel') {
       const key = interaction.options.getString('setting');
       const channel = interaction.options.getChannel('channel');
-      const wantsCategory = key === 'ticketCategoryId';
+      const wantsCategory = key === 'ticketCategoryId' || key === 'purchaseTicketCategoryId';
       if (wantsCategory !== (channel.type === ChannelType.GuildCategory)) {
         return interaction.reply({
           content: wantsCategory ? 'Please pick a **category**.' : 'Please pick a **text channel**.',

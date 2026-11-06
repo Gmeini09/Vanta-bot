@@ -19,6 +19,7 @@ module.exports = {
       // Ticket category dropdown
       if (interaction.isStringSelectMenu()) {
         if (interaction.customId === 'ticket_select') await tickets.onSelect(interaction);
+        else if (interaction.customId.startsWith('ticket_buy_')) await tickets.onShopSelect(interaction);
         return;
       }
 
