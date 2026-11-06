@@ -111,11 +111,10 @@ async function logTicket(guild, { title, color, fields = [], transcript }) {
 function buildPanel(guild) {
   const embed = new EmbedBuilder()
     .setColor(config.brand.color)
-    .setTitle('🎫 Support Tickets')
+    .setTitle('✦ Support Tickets')
     .setDescription(
-      'Need help? Choose a category from the menu below and fill out the short form.\n' +
-        'A private channel will be created where only you and the team can see it.\n\n' +
-        CATEGORIES.map((c) => `${c.emoji} **${c.label}** — ${c.description}`).join('\n'),
+      'Need help or want to purchase? Select a category below and we\u2019ll create a private ticket for you.\n\n' +
+        CATEGORIES.map((c) => `**${c.label}**\n${c.description}`).join('\n\n'),
     )
     .setFooter({ text: `${config.brand.name} • Please don't open tickets without a reason` });
   const icon = guild?.iconURL({ size: 256 });
@@ -123,7 +122,7 @@ function buildPanel(guild) {
 
   const menu = new StringSelectMenuBuilder()
     .setCustomId('ticket_select')
-    .setPlaceholder('📩 Select a category to open a ticket')
+    .setPlaceholder('Select a category')
     .addOptions(
       CATEGORIES.map((c) => ({ label: c.label, value: c.key, description: c.description, emoji: c.emoji })),
     );

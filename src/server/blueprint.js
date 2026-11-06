@@ -17,53 +17,59 @@ const ROLES = [
     setting: 'ticketSupportRoleId',
     permissions: [P.ManageMessages, P.KickMembers, P.ModerateMembers, P.MuteMembers, P.MoveMembers],
   },
-  // Members get this role by accepting the rules (rules panel button).
+  // Members get this role by reacting with ✅ in the verify channel.
   { key: 'member', name: '👤 Member', color: 0x9B59B6, hoist: false, setting: 'verifiedRoleId', permissions: [] },
 ];
 
-// access: 'public' (default) | 'members' (only after accepting the rules) | 'staff' (only staff can see)
+// access: 'public' (default) | 'members' (only after verifying) | 'staff' (only staff can see)
+//         | 'unverified' (everyone sees it until they verify, then it disappears)
 // readonly: only staff (and the bot) can write
 // setting: store the channel ID in the bot settings
-// panel: 'rules' / 'tickets' keeps that panel posted and up to date there
+// panel: 'rules' / 'tickets' / 'verify' keeps that panel posted and up to date there
 const CATEGORIES = [
   {
     key: 'welcome',
-    name: '🏠 WELCOME',
+    name: 'Welcome',
     readonly: true,
     channels: [
-      { key: 'rules', name: '📜│rules', panel: 'rules' },
-      { key: 'announcements', name: '📢│announcements' },
-      { key: 'welcome', name: '👋│welcome', setting: ['welcomeChannelId', 'leaveChannelId'] },
+      { key: 'welcome', name: '👋│join', setting: ['welcomeChannelId', 'leaveChannelId'] },
+      { key: 'rules', name: '🧾│rules', panel: 'rules' },
+      { key: 'verify', name: '✅│verify', access: 'unverified', panel: 'verify' },
     ],
   },
   {
-    key: 'community',
-    name: '💬 COMMUNITY',
+    key: 'information',
+    name: 'information',
     access: 'members',
+    readonly: true,
     channels: [
-      { key: 'general', name: '💬│general', main: true },
-      { key: 'media', name: '🖼️│media' },
-      { key: 'commands', name: '🤖│commands' },
-      { key: 'off-topic', name: '😎│off-topic' },
+      { key: 'info', name: '❗│info', main: true },
+      { key: 'giveaway', name: '🎉│giveaway' },
+      { key: 'showcase', name: '📷│showcase' },
+      { key: 'ref-bypass', name: '⭐│ref-bypass' },
+      { key: 'bypassed', name: '⭐│bypassed' },
     ],
   },
   {
     key: 'support',
-    name: '🎫 SUPPORT',
+    name: 'Ticket',
     access: 'members',
-    channels: [{ key: 'open-ticket', name: '🎫│open-a-ticket', readonly: true, panel: 'tickets' }],
+    readonly: true,
+    channels: [{ key: 'open-ticket', name: '✉️│ticket', panel: 'tickets' }],
   },
-  { key: 'tickets', name: '📂 TICKETS', access: 'staff', setting: 'ticketCategoryId', channels: [] },
   {
-    key: 'voice',
-    name: '🔊 VOICE',
+    key: 'product',
+    name: 'product',
     access: 'members',
+    readonly: true,
     channels: [
-      { key: 'vc-general', name: '🔊 General', type: ChannelType.GuildVoice },
-      { key: 'vc-gaming', name: '🎮 Gaming', type: ChannelType.GuildVoice },
-      { key: 'vc-music', name: '🎵 Music', type: ChannelType.GuildVoice },
+      { key: 'public', name: '🛒│public' },
+      { key: 'private', name: '🛒│private' },
+      { key: 'kernel', name: '🛒│kernel' },
     ],
   },
+  // Ticket channels are created in here.
+  { key: 'tickets', name: 'Support', access: 'staff', setting: 'ticketCategoryId', channels: [] },
   {
     key: 'staff',
     name: '🔒 STAFF',
@@ -91,6 +97,16 @@ function overwritesFor(access, readonly, guild, roles) {
       ...staffIds.map((id) => ({ id, allow: STAFF_ALLOW })),
       { id: me, allow: BOT_ALLOW },
     ];
+  }
+
+  // Visible to everyone until they get the Member role. Reacting is still
+  // possible: anyone can click a reaction that already exists on a message.
+  if (access === 'unverified') {
+    const list = [{ id: everyone, allow: [P.ViewChannel, P.ReadMessageHistory], deny: WRITE }];
+    if (roles.member) list.push({ id: roles.member.id, deny: [P.ViewChannel] });
+    list.push(...staffIds.map((id) => ({ id, allow: STAFF_ALLOW })));
+    list.push({ id: me, allow: [...BOT_ALLOW, P.AddReactions, P.ManageMessages] });
+    return list;
   }
 
   const everyoneDeny = [];

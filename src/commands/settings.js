@@ -13,7 +13,7 @@ const CHANNEL_KEYS = {
 };
 const ROLE_KEYS = {
   autoRoleId: 'Auto-role (new members)',
-  verifiedRoleId: 'Verified role (accepting rules)',
+  verifiedRoleId: 'Verified role (✅ in verify channel)',
   ticketSupportRoleId: 'Ticket support role',
 };
 const ALL_KEYS = { ...CHANNEL_KEYS, ...ROLE_KEYS };
