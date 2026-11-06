@@ -17,6 +17,7 @@ module.exports = {
           '**/kick** — kick a member (staff)',
           '**/ban** — ban a member (staff)',
           '**/warn** — warn a member (staff)',
+          '**/setup-server** — reset & build channels/roles (admin)',
         ].join('\n'),
       )
       .setFooter({ text: config.brand.name })
