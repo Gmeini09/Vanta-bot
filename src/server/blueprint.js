@@ -46,7 +46,7 @@ const CATEGORIES = [
       { key: 'info', name: '❗│info', main: true },
       { key: 'giveaway', name: '🎉│giveaway' },
       { key: 'showcase', name: '📷│showcase' },
-      { key: 'ref-bypass', name: '⭐│ref-bypass' },
+      { key: 'ref-bypass', name: '⭐│proof' },
       { key: 'bypassed', name: '⭐│bypassed' },
     ],
   },
