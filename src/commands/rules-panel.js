@@ -1,12 +1,11 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } = require('discord.js');
-const settings = require('../utils/settings');
 const { buildRulesPanel } = require('../handlers/rules');
 const panels = require('../server/panels');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('rules-panel')
-    .setDescription('Post the rules with an "Accept rules" button.')
+    .setDescription('Post the rules panel.')
     .addChannelOption((o) =>
       o.setName('channel').setDescription('Where to post it (defaults to here)').addChannelTypes(ChannelType.GuildText),
     )
@@ -17,10 +16,9 @@ module.exports = {
     const msg = await channel.send(buildRulesPanel(interaction.guild));
     panels.register(interaction.guild.id, 'rules', channel.id, msg.id);
 
-    const roleId = settings.get(interaction.guild.id, 'verifiedRoleId');
-    const note = roleId
-      ? `Members get <@&${roleId}> when they accept.`
-      : 'No verified role is set yet — set one with `/settings role` so accepting gives a role.';
-    return interaction.reply({ content: `✅ Rules panel posted in ${channel}.\n${note}`, flags: MessageFlags.Ephemeral });
+    return interaction.reply({
+      content: `✅ Rules panel posted in ${channel}. Members verify with \`/verify-panel\` (react with ✅).`,
+      flags: MessageFlags.Ephemeral,
+    });
   },
 };

@@ -6,6 +6,7 @@ A clean, self-hostable community Discord bot built with [discord.js v14](https:/
 
 - **Welcome & leave messages** — greets new members, announces leavers.
 - **Auto-role** — automatically assign a role to new members.
+- **Reaction verify** — new members react with ✅ in the verify channel to get the Member role and see the server.
 - **Self-roles** — button panel for members to pick their own roles.
 - **Ticket system**
   - Panel with a category dropdown (Support, Question, Report, Partnership, Other)
@@ -38,6 +39,7 @@ All commands are slash commands with built-in permission gating, and they are
 | `/serverinfo` | — | Info about the server |
 | `/avatar` | — | Show a user's avatar |
 | `/poll` | — | Reaction poll (up to 5 options) |
+| `/verify-panel` | Manage Server | Post the verify message (react ✅ → Member role) |
 | `/ticket-panel` | Manage Channels | Post the ticket panel |
 | `/ticket` | owner / staff | Close, add/remove members, rename the current ticket |
 | `/settings` | Manage Server | View / change channels and roles used by the bot |

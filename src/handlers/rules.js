@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
 const settings = require('../utils/settings');
 const RULES = require('../rules');
@@ -17,10 +17,8 @@ function buildRulesPanel(guild) {
   const icon = guild?.iconURL({ size: 256 });
   if (icon) embed.setThumbnail(icon);
 
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('rules_accept').setLabel('Accept rules').setEmoji('✅').setStyle(ButtonStyle.Success),
-  );
-  return { embeds: [embed], components: [row] };
+  // Verification happens in the verify channel (react with ✅), so no button here.
+  return { embeds: [embed], components: [] };
 }
 
 async function onAccept(interaction) {

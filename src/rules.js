@@ -1,7 +1,7 @@
 // Server rules shown by /rules-panel. Edit freely.
 module.exports = {
   title: '📜 Server Rules',
-  intro: 'Please read the rules below. Click **Accept rules** to unlock the rest of the server.',
+  intro: 'Please read the rules below. Then head to the **verify** channel and react with ✅ to unlock the rest of the server.',
   rules: [
     { emoji: '🤝', title: 'Be respectful', text: 'No harassment, hate speech, discrimination or personal attacks.' },
     { emoji: '🚫', title: 'No spam', text: 'No message flooding, excessive caps, emoji spam or mass mentions.' },
@@ -12,5 +12,5 @@ module.exports = {
     { emoji: '🛡️', title: 'Follow Discord\'s rules', text: 'The [Terms of Service](https://discord.com/terms) and [Community Guidelines](https://discord.com/guidelines) apply here.' },
     { emoji: '👮', title: 'Listen to staff', text: 'Staff decisions are final. Disagree? Open a ticket instead of arguing in chat.' },
   ],
-  footer: 'By accepting, you agree to follow these rules. Breaking them can lead to a warning, timeout or ban.',
+  footer: 'By verifying, you agree to follow these rules. Breaking them can lead to a warning, timeout or ban.',
 };

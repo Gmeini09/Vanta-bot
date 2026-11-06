@@ -3,11 +3,22 @@
 const store = require('../utils/store');
 
 const NAME = 'panels';
-const MARKERS = { rules: ['rules_accept'], tickets: ['ticket_select', 'ticket_open'] };
+const MARKERS = { rules: ['rules_accept'], tickets: ['ticket_select', 'ticket_open'], verify: [] };
+
+const hasMarker = (m, type) =>
+  type === 'verify'
+    ? require('../handlers/verify').isVerifyPanel(m)
+    : m.components.some((row) => row.components?.some((c) => MARKERS[type].includes(c.customId)));
+
+// The verify panel works with a reaction the bot keeps on the message.
+async function afterPost(type, message) {
+  if (type === 'verify') await message.react(require('../handlers/verify').EMOJI).catch(() => {});
+}
 
 function build(type, guild) {
   if (type === 'rules') return require('../handlers/rules').buildRulesPanel(guild);
   if (type === 'tickets') return require('../tickets/manager').buildPanel(guild);
+  if (type === 'verify') return require('../handlers/verify').buildVerifyPanel(guild);
   return null;
 }
 
@@ -43,8 +54,7 @@ async function findExisting(channel, type) {
   return (
     recent.find(
       (m) =>
-        m.author.id === channel.client.user.id &&
-        m.components.some((row) => row.components?.some((c) => MARKERS[type].includes(c.customId))),
+        m.author.id === channel.client.user.id && hasMarker(m, type),
     ) || null
   );
 }
@@ -62,6 +72,7 @@ async function ensure(guild, type, channel) {
     const ok = await message.edit(payload).then(() => true).catch(() => false);
     if (ok) {
       register(guild.id, type, channel.id, message.id);
+      await afterPost(type, message);
       return 'updated';
     }
   }
@@ -69,6 +80,7 @@ async function ensure(guild, type, channel) {
   const sent = await channel.send(payload).catch(() => null);
   if (!sent) return null;
   register(guild.id, type, channel.id, sent.id);
+  await afterPost(type, sent);
   return 'posted';
 }
 
@@ -83,7 +95,10 @@ async function refreshAll(guild) {
         unregister(guild.id, type, e.messageId);
         continue;
       }
-      if (await message.edit(build(type, guild)).then(() => true).catch(() => false)) count++;
+      if (await message.edit(build(type, guild)).then(() => true).catch(() => false)) {
+        await afterPost(type, message);
+        count++;
+      }
     }
   }
   return count;
