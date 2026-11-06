@@ -15,6 +15,7 @@ const config = require('../config');
 const store = require('../utils/store');
 const settings = require('../utils/settings');
 const CATEGORIES = require('./categories');
+const PRODUCTS = require('./products');
 const { buildTranscript, toAttachment } = require('./transcript');
 
 const EPH = MessageFlags.Ephemeral;
@@ -165,6 +166,63 @@ function closedControls() {
   );
 }
 
+// Purchase: pick version + duration. The choice is kept in the dropdowns
+// themselves (selected option), so nothing has to be remembered in between.
+function buildShop(version, duration, note) {
+  const versionMenu = new StringSelectMenuBuilder()
+    .setCustomId('ticket_buy_version')
+    .setPlaceholder('Which version?')
+    .addOptions(
+      PRODUCTS.versions.slice(0, 25).map((v) => ({
+        label: v.label,
+        value: v.key,
+        description: v.description || undefined,
+        emoji: v.emoji || undefined,
+        default: v.key === version,
+      })),
+    );
+  const durationMenu = new StringSelectMenuBuilder()
+    .setCustomId('ticket_buy_duration')
+    .setPlaceholder('How long?')
+    .addOptions(
+      PRODUCTS.durations.slice(0, 25).map((d) => ({
+        label: d.label,
+        value: d.key,
+        description: d.description || undefined,
+        emoji: d.emoji || undefined,
+        default: d.key === duration,
+      })),
+    );
+  const button = new ButtonBuilder()
+    .setCustomId('ticket_buy_open')
+    .setLabel('Open purchase ticket')
+    .setEmoji('🛒')
+    .setStyle(ButtonStyle.Success)
+    .setDisabled(!version || !duration);
+
+  return {
+    content: note || '**🛒 What do you want to buy?**\nPick a version and a duration, then open your ticket.',
+    components: [
+      new ActionRowBuilder().addComponents(versionMenu),
+      new ActionRowBuilder().addComponents(durationMenu),
+      new ActionRowBuilder().addComponents(button),
+    ],
+  };
+}
+
+// Reads the currently selected version/duration from a shop message.
+function shopSelection(message) {
+  const picked = (id) => {
+    for (const row of message?.components || []) {
+      for (const c of row.components || []) {
+        if (c.customId === id) return c.options?.find((o) => o.default)?.value || null;
+      }
+    }
+    return null;
+  };
+  return { version: picked('ticket_buy_version'), duration: picked('ticket_buy_duration') };
+}
+
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------
@@ -174,8 +232,10 @@ async function createTicket(interaction, cat, answers) {
   const n = pad(num);
   const supportRoleId = settings.get(guild.id, 'ticketSupportRoleId');
   const supportRole = supportRoleId && guild.roles.cache.get(supportRoleId);
-  const parentId = settings.get(guild.id, 'ticketCategoryId');
-  const parent = guild.channels.cache.get(parentId);
+  const ownParent = cat.parentSetting && guild.channels.cache.get(settings.get(guild.id, cat.parentSetting));
+  const parent = ownParent?.type === ChannelType.GuildCategory
+    ? ownParent
+    : guild.channels.cache.get(settings.get(guild.id, 'ticketCategoryId'));
 
   const memberPerms = [
     PermissionFlagsBits.ViewChannel,
@@ -369,7 +429,47 @@ async function onSelect(interaction) {
     await interaction.update(buildPanel(interaction.guild));
     return interaction.followUp({ content: `You already have an open ticket: ${open[0]}`, flags: EPH });
   }
+  if (cat.shop) {
+    // Reset the panel dropdown and show the version/duration picker privately.
+    await interaction.update(buildPanel(interaction.guild));
+    return interaction.followUp({ ...buildShop(null, null), flags: EPH });
+  }
   return interaction.showModal(buildModal(cat));
+}
+
+// Version or duration picked in the purchase picker.
+async function onShopSelect(interaction) {
+  const current = shopSelection(interaction.message);
+  if (interaction.customId === 'ticket_buy_version') current.version = interaction.values[0];
+  if (interaction.customId === 'ticket_buy_duration') current.duration = interaction.values[0];
+  return interaction.update(buildShop(current.version, current.duration));
+}
+
+async function onShopOpen(interaction) {
+  const { version, duration } = shopSelection(interaction.message);
+  const v = PRODUCTS.versions.find((x) => x.key === version);
+  const d = PRODUCTS.durations.find((x) => x.key === duration);
+  if (!v || !d) return interaction.update(buildShop(version, duration, '⚠️ Please pick a version **and** a duration.'));
+
+  const open = findOpenTickets(interaction.guild, interaction.user.id);
+  if (open.length >= MAX_OPEN_PER_USER) {
+    return interaction.update({ content: `You already have an open ticket: ${open[0]}`, components: [] });
+  }
+
+  await interaction.update({ content: '⏳ Creating your ticket…', components: [] });
+  const cat = CATEGORIES.find((c) => c.shop);
+  try {
+    const channel = await createTicket(interaction, cat, [
+      { label: 'Version', value: v.label },
+      { label: 'Duration', value: d.label },
+    ]);
+    return interaction.editReply(`✅ Your purchase ticket has been created: ${channel}`);
+  } catch (err) {
+    console.error('[tickets] create failed:', err);
+    return interaction.editReply(
+      "❌ I couldn't create your ticket. Make sure I have the **Manage Channels** permission and my role is high enough.",
+    );
+  }
 }
 
 async function onModal(interaction) {
@@ -405,13 +505,15 @@ async function onButton(interaction) {
   const id = interaction.customId;
   const channel = interaction.channel;
 
+  if (id === 'ticket_buy_open') return onShopOpen(interaction);
+
   // Legacy button from older panels
   if (id === 'ticket_open') {
     const open = findOpenTickets(interaction.guild, interaction.user.id);
     if (open.length >= MAX_OPEN_PER_USER) {
       return interaction.reply({ content: `You already have an open ticket: ${open[0]}`, flags: EPH });
     }
-    return interaction.showModal(buildModal(CATEGORIES[0]));
+    return interaction.showModal(buildModal(CATEGORIES.find((c) => !c.shop) || CATEGORIES[0]));
   }
 
   const t = getTicket(channel);
@@ -489,6 +591,7 @@ module.exports = {
   closeTicket,
   deleteMeta,
   onSelect,
+  onShopSelect,
   onModal,
   onButton,
 };

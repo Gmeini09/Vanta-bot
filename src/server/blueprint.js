@@ -68,7 +68,8 @@ const CATEGORIES = [
       { key: 'kernel', name: '🛒│kernel' },
     ],
   },
-  // Ticket channels are created in here.
+  // Ticket channels are created in here (purchase tickets get their own category).
+  { key: 'purchase-tickets', name: 'Purchase', access: 'staff', setting: 'purchaseTicketCategoryId', channels: [] },
   { key: 'tickets', name: 'Support', access: 'staff', setting: 'ticketCategoryId', channels: [] },
   {
     key: 'staff',

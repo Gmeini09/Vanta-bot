@@ -9,12 +9,12 @@ module.exports = [
     emoji: '🛒',
     description: 'Orders, payments and products',
     prefix: 'purchase',
-    welcome: 'Tell us which product you want and how you would like to pay — the team will be with you shortly.',
-    questions: [
-      { id: 'subject', label: 'Which product?', placeholder: 'e.g. public, private, kernel', required: true },
-      { id: 'payment', label: 'Payment method', placeholder: 'How do you want to pay?', required: false },
-      { id: 'details', label: 'Anything else?', placeholder: 'Questions, duration, …', long: true, required: false },
-    ],
+    // Own category for purchase tickets (falls back to the normal ticket category).
+    parentSetting: 'purchaseTicketCategoryId',
+    // Instead of a form, the member picks version + duration from dropdowns (src/tickets/products.js).
+    shop: true,
+    welcome: 'Thanks for your order! A team member will be with you shortly to sort out the payment.',
+    questions: [],
   },
   {
     key: 'support',
