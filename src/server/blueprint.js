@@ -71,6 +71,9 @@ const CATEGORIES = [
   // Ticket channels are created in here (purchase tickets get their own category).
   { key: 'purchase-tickets', name: 'Purchase', access: 'staff', setting: 'purchaseTicketCategoryId', channels: [] },
   { key: 'tickets', name: 'Support', access: 'staff', setting: 'ticketCategoryId', channels: [] },
+  // Closed tickets are moved here (staff only).
+  { key: 'closed-purchase', name: 'Closed Purchase', access: 'staff', setting: 'closedPurchaseCategoryId', channels: [] },
+  { key: 'closed-support', name: 'Closed Support', access: 'staff', setting: 'closedTicketCategoryId', channels: [] },
   {
     key: 'staff',
     name: '🔒 STAFF',

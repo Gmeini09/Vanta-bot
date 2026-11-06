@@ -11,6 +11,7 @@ module.exports = [
     prefix: 'purchase',
     // Own category for purchase tickets (falls back to the normal ticket category).
     parentSetting: 'purchaseTicketCategoryId',
+    closedSetting: 'closedPurchaseCategoryId',
     // Instead of a form, the member picks version + duration from dropdowns (src/tickets/products.js).
     shop: true,
     welcome: 'Thanks for your order! A team member will be with you shortly to sort out the payment.',
@@ -22,6 +23,7 @@ module.exports = [
     emoji: '🛠️',
     description: 'Help, questions and issues',
     prefix: 'support',
+    closedSetting: 'closedTicketCategoryId',
     welcome: 'Describe your problem as precisely as possible — screenshots help a lot.',
     questions: [
       { id: 'subject', label: 'What do you need help with?', placeholder: 'Short summary', required: true },

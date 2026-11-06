@@ -223,6 +223,24 @@ function shopSelection(message) {
   return { version: picked('ticket_buy_version'), duration: picked('ticket_buy_duration') };
 }
 
+// Category a ticket belongs in: its own open/closed category if set,
+// otherwise the general ticket category. Returns a category channel or null.
+function parentFor(guild, cat, closed) {
+  const asCategory = (key) => {
+    const c = key && guild.channels.cache.get(settings.get(guild.id, key));
+    return c?.type === ChannelType.GuildCategory ? c : null;
+  };
+  if (closed) return asCategory(cat.closedSetting) || null;
+  return asCategory(cat.parentSetting) || asCategory('ticketCategoryId');
+}
+
+async function moveTicket(channel, cat, closed) {
+  const target = parentFor(channel.guild, cat, closed);
+  if (target && channel.parentId !== target.id) {
+    await channel.setParent(target.id, { lockPermissions: false }).catch(() => {});
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------
@@ -232,10 +250,7 @@ async function createTicket(interaction, cat, answers) {
   const n = pad(num);
   const supportRoleId = settings.get(guild.id, 'ticketSupportRoleId');
   const supportRole = supportRoleId && guild.roles.cache.get(supportRoleId);
-  const ownParent = cat.parentSetting && guild.channels.cache.get(settings.get(guild.id, cat.parentSetting));
-  const parent = ownParent?.type === ChannelType.GuildCategory
-    ? ownParent
-    : guild.channels.cache.get(settings.get(guild.id, 'ticketCategoryId'));
+  const parent = parentFor(guild, cat, false);
 
   const memberPerms = [
     PermissionFlagsBits.ViewChannel,
@@ -257,7 +272,7 @@ async function createTicket(interaction, cat, answers) {
   const channel = await guild.channels.create({
     name: `${cat.prefix}-${n}`,
     type: ChannelType.GuildText,
-    parent: parent?.type === ChannelType.GuildCategory ? parent.id : undefined,
+    parent: parent?.id,
     topic: `Ticket #${n} | ${cat.label} | owner:${user.id} | cat:${cat.key}`,
     permissionOverwrites: overwrites,
     reason: `Ticket opened by ${user.tag}`,
@@ -316,6 +331,7 @@ async function closeTicket(channel, closer, reason) {
     .catch(() => {});
   // Renames are heavily rate-limited by Discord, so don't wait on them.
   channel.setName(`closed-${n}`).catch(() => {});
+  await moveTicket(channel, category(t.category), true);
 
   const embed = new EmbedBuilder()
     .setColor(config.brand.danger)
@@ -371,6 +387,7 @@ async function reopenTicket(interaction) {
     .edit(t.ownerId, { ViewChannel: true, SendMessages: true, ReadMessageHistory: true, AttachFiles: true })
     .catch(() => {});
   channel.setName(`${cat.prefix}-${pad(t.number)}`).catch(() => {});
+  await moveTicket(channel, cat, false);
 
   await interaction.update({ components: [] });
   await channel.send({

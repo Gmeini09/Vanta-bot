@@ -14,6 +14,8 @@ function envDefaults() {
     verifiedRoleId: process.env.VERIFIED_ROLE_ID || '',
     ticketCategoryId: config.tickets.categoryId,
     purchaseTicketCategoryId: process.env.PURCHASE_TICKET_CATEGORY_ID || '',
+    closedPurchaseCategoryId: process.env.CLOSED_PURCHASE_CATEGORY_ID || '',
+    closedTicketCategoryId: process.env.CLOSED_TICKET_CATEGORY_ID || '',
     ticketSupportRoleId: config.tickets.supportRoleId,
     ticketLogChannelId: config.tickets.logChannelId,
   };
