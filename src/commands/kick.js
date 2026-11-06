@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const config = require('../config');
+const modlog = require('../utils/modlog');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -23,10 +24,20 @@ module.exports = {
       });
     }
 
+    await target.send(`You were kicked from **${interaction.guild.name}**.\nReason: ${reason}`).catch(() => null);
     await target.kick(reason);
+
     const embed = new EmbedBuilder()
-      .setColor(config.brand.color)
+      .setColor(config.brand.warn)
       .setDescription(`👢 **${target.user.tag}** was kicked.\nReason: ${reason}`);
-    return interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] });
+
+    modlog.log(interaction.guild, {
+      action: '👢 Member kicked',
+      color: config.brand.warn,
+      target: target.user,
+      moderator: interaction.user,
+      reason,
+    });
   },
 };
