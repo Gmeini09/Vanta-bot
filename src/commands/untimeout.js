@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const config = require('../config');
 const modlog = require('../utils/modlog');
 
@@ -11,9 +11,9 @@ module.exports = {
 
   async execute(interaction) {
     const target = interaction.options.getMember('member');
-    if (!target) return interaction.reply({ content: 'That member is not here.', ephemeral: true });
+    if (!target) return interaction.reply({ content: 'That member is not here.', flags: MessageFlags.Ephemeral });
     if (!target.isCommunicationDisabled()) {
-      return interaction.reply({ content: 'That member is not timed out.', ephemeral: true });
+      return interaction.reply({ content: 'That member is not timed out.', flags: MessageFlags.Ephemeral });
     }
 
     await target.timeout(null);

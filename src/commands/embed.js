@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
 
 module.exports = {
@@ -23,6 +23,6 @@ module.exports = {
 
     const embed = new EmbedBuilder().setColor(color).setTitle(title).setDescription(description);
     await interaction.channel.send({ embeds: [embed] });
-    return interaction.reply({ content: 'Embed posted.', ephemeral: true });
+    return interaction.reply({ content: 'Embed posted.', flags: MessageFlags.Ephemeral });
   },
 };

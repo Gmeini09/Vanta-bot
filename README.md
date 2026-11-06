@@ -7,12 +7,23 @@ A clean, self-hostable community Discord bot built with [discord.js v14](https:/
 - **Welcome & leave messages** — greets new members, announces leavers.
 - **Auto-role** — automatically assign a role to new members.
 - **Self-roles** — button panel for members to pick their own roles.
-- **Tickets** — button opens a private support channel, button closes it.
+- **Ticket system**
+  - Panel with a category dropdown (Support, Question, Report, Partnership, Other)
+  - Each category has its own short form (Discord modal)
+  - Numbered private channels (`support-0001`), one open ticket per member
+  - Staff can **claim** tickets; close with confirmation and optional reason
+  - Closed tickets can be **reopened**, exported or **deleted**
+  - **HTML transcripts** sent to the ticket-log channel and DM'd to the owner
+  - `/ticket add | remove | rename | close`
+  - Categories and questions are editable in `src/tickets/categories.js`
+- **Settings in Discord** — `/settings` to set channels and roles without touching env vars.
 - **Moderation** — kick, ban, unban, timeout, warnings (persistent), clear,
   slowmode, lock/unlock, with optional mod-log channel.
 - **Giveaways** — start reaction giveaways with multiple winners + reroll.
 - **Utility** — userinfo, serverinfo, avatar, poll, say, embed.
-- **Server setup** — `/setup-server` wipes and rebuilds channels + roles.
+- **Server setup** — `/setup-server` wipes and rebuilds the server, creates a
+  staff area with mod/ticket logs, posts the ticket panel and saves all settings.
+- **Giveaways survive restarts** — running giveaways are stored and resumed.
 
 All commands are slash commands with built-in permission gating, and they are
 **auto-registered on startup** — no separate deploy step needed.
@@ -27,7 +38,9 @@ All commands are slash commands with built-in permission gating, and they are
 | `/serverinfo` | — | Info about the server |
 | `/avatar` | — | Show a user's avatar |
 | `/poll` | — | Reaction poll (up to 5 options) |
-| `/ticket-panel` | Manage Channels | Post the ticket button |
+| `/ticket-panel` | Manage Channels | Post the ticket panel |
+| `/ticket` | owner / staff | Close, add/remove members, rename the current ticket |
+| `/settings` | Manage Server | View / change channels and roles used by the bot |
 | `/role-panel` | Manage Roles | Post self-role buttons |
 | `/kick` | Kick Members | Kick a member |
 | `/ban` | Ban Members | Ban a member |
@@ -51,7 +64,9 @@ All commands are slash commands with built-in permission gating, and they are
 ### Bot setup in the Developer Portal
 
 1. Create an application → **Bot** → copy the **token**.
-2. Under **Bot → Privileged Gateway Intents**, enable **Server Members Intent**.
+2. Under **Bot → Privileged Gateway Intents**, enable **Server Members Intent**
+   and **Message Content Intent** (needed for ticket transcripts; the bot still
+   starts without it, but transcripts won't contain message text).
 3. Invite with the `bot` and `applications.commands` scopes and these
    permissions: Manage Roles, Manage Channels, Kick Members, Ban Members,
    Manage Messages, Moderate Members, Send Messages, Read Message History,
@@ -96,10 +111,11 @@ channel/role/user → **Copy ID**.
    `DISCORD_TOKEN` and `CLIENT_ID`).
 4. Railway builds with Nixpacks and runs `npm start`. Commands auto-register.
 
-### Persistent warnings
+### Persistent data
 
-Railway's filesystem is wiped on each deploy. To keep warnings, add a **Volume**
-mounted at `/data` and set `DATA_DIR=/data`.
+Settings, warnings, ticket data and giveaways are stored as JSON in `DATA_DIR`.
+Railway's filesystem is wiped on each deploy, so add a **Volume** mounted at
+`/data` and set `DATA_DIR=/data`.
 
 ## Project structure
 
@@ -110,8 +126,9 @@ src/
   config.js           # reads env vars
   commands/           # one file per slash command
   events/             # ready, join, leave, interactions
-  handlers/           # roles + tickets logic
-  utils/              # store, warnings, mod-log helpers
+  handlers/           # self-role buttons
+  tickets/            # ticket manager, categories, transcripts
+  utils/              # store, settings, warnings, giveaways, mod-log
 ```
 
 ## License

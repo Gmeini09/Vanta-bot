@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
 
 const LETTERS = ['🇦', '🇧', '🇨', '🇩', '🇪'];
@@ -28,7 +28,7 @@ module.exports = {
       .setDescription(options.map((o, i) => `${LETTERS[i]} ${o}`).join('\n\n'))
       .setFooter({ text: `Poll by ${interaction.user.tag}` });
 
-    await interaction.reply({ content: 'Poll created.', ephemeral: true });
+    await interaction.reply({ content: 'Poll created.', flags: MessageFlags.Ephemeral });
     const msg = await interaction.channel.send({ embeds: [embed] });
     for (let i = 0; i < options.length; i++) await msg.react(LETTERS[i]);
   },

@@ -1,7 +1,7 @@
-const { Events } = require('discord.js');
+const { Events, MessageFlags } = require('discord.js');
 const config = require('../config');
 const roles = require('../handlers/roles');
-const tickets = require('../handlers/tickets');
+const tickets = require('../tickets/manager');
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -11,28 +11,41 @@ module.exports = {
       if (interaction.isChatInputCommand()) {
         const command = client.commands.get(interaction.commandName);
         if (!command) return;
-        return command.execute(interaction, client);
+        await command.execute(interaction, client);
+        return;
+      }
+
+      // Ticket category dropdown
+      if (interaction.isStringSelectMenu()) {
+        if (interaction.customId === 'ticket_select') await tickets.onSelect(interaction);
+        return;
+      }
+
+      // Ticket form submitted
+      if (interaction.isModalSubmit()) {
+        if (interaction.customId.startsWith('ticket_modal:')) await tickets.onModal(interaction);
+        return;
       }
 
       // Buttons
       if (interaction.isButton()) {
         const id = interaction.customId;
-
-        // Role toggle buttons
         if (config.roleButtons[id]) {
-          return roles.toggleRole(interaction, config.roleButtons[id]);
+          await roles.toggleRole(interaction, config.roleButtons[id]);
+          return;
         }
-
-        // Ticket buttons
-        if (id === 'ticket_open') return tickets.openTicket(interaction);
-        if (id === 'ticket_close') return tickets.closeTicket(interaction);
+        if (id.startsWith('ticket_')) {
+          await tickets.onButton(interaction);
+        }
+        // Other buttons (e.g. /setup-server confirmation) are handled by collectors.
       }
     } catch (err) {
-      console.error('[interaction] error:', err);
-      const reply = { content: 'Something went wrong handling that.', ephemeral: true };
+      const where = interaction.commandName || interaction.customId || 'interaction';
+      console.error(`[interaction] error in ${where}:`, err);
+      const reply = { content: '❌ Something went wrong. Please try again.', flags: MessageFlags.Ephemeral };
       if (interaction.deferred || interaction.replied) {
         interaction.followUp(reply).catch(() => {});
-      } else {
+      } else if (interaction.isRepliable()) {
         interaction.reply(reply).catch(() => {});
       }
     }

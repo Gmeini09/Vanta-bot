@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
 const modlog = require('../utils/modlog');
 
@@ -22,7 +22,7 @@ module.exports = {
     if (target && !target.bannable) {
       return interaction.reply({
         content: "I can't ban that member (role hierarchy or missing permission).",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 

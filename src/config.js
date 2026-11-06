@@ -34,6 +34,7 @@ module.exports = {
   tickets: {
     categoryId: process.env.TICKET_CATEGORY_ID || '',
     supportRoleId: process.env.TICKET_SUPPORT_ROLE_ID || '',
+    logChannelId: process.env.TICKET_LOG_CHANNEL_ID || '',
   },
 
   // Role button panel: map a custom button id -> role ID.

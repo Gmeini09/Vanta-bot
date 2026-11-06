@@ -1,16 +1,17 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
 
 const CATEGORIES = {
   '🛠️ Utility': ['/help', '/ping', '/userinfo', '/serverinfo', '/avatar', '/poll'],
-  '🎟️ Panels': ['/ticket-panel', '/role-panel'],
+  '🎫 Tickets': ['/ticket close', '/ticket add', '/ticket remove', '/ticket rename', '/ticket-panel'],
+  '🎟️ Roles': ['/role-panel'],
   '🛡️ Moderation': [
     '/kick', '/ban', '/unban', '/timeout', '/untimeout',
     '/warn', '/warnings', '/clear', '/slowmode', '/lock', '/unlock',
   ],
   '🎉 Fun': ['/giveaway'],
   '📢 Staff': ['/say', '/embed'],
-  '⚙️ Admin': ['/setup-server'],
+  '⚙️ Admin': ['/settings', '/setup-server'],
 };
 
 module.exports = {
@@ -27,6 +28,6 @@ module.exports = {
       embed.addFields({ name: cat, value: cmds.join(' · ') });
     }
 
-    return interaction.reply({ embeds: [embed], ephemeral: true });
+    return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
   },
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
 const warnings = require('../utils/warnings');
 const modlog = require('../utils/modlog');
@@ -16,10 +16,10 @@ module.exports = {
     const reason = interaction.options.getString('reason');
 
     if (!target) {
-      return interaction.reply({ content: 'That member is not in this server.', ephemeral: true });
+      return interaction.reply({ content: 'That member is not in this server.', flags: MessageFlags.Ephemeral });
     }
     if (target.user.bot) {
-      return interaction.reply({ content: "You can't warn a bot.", ephemeral: true });
+      return interaction.reply({ content: "You can't warn a bot.", flags: MessageFlags.Ephemeral });
     }
 
     const count = warnings.add(interaction.guild.id, target.id, {

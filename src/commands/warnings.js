@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
 const warnings = require('../utils/warnings');
 
@@ -26,12 +26,12 @@ module.exports = {
 
     if (sub === 'clear') {
       warnings.clear(interaction.guild.id, user.id);
-      return interaction.reply({ content: `Cleared all warnings for **${user.tag}**.`, ephemeral: true });
+      return interaction.reply({ content: `Cleared all warnings for **${user.tag}**.`, flags: MessageFlags.Ephemeral });
     }
 
     const list = warnings.get(interaction.guild.id, user.id);
     if (list.length === 0) {
-      return interaction.reply({ content: `**${user.tag}** has no warnings.`, ephemeral: true });
+      return interaction.reply({ content: `**${user.tag}** has no warnings.`, flags: MessageFlags.Ephemeral });
     }
 
     const embed = new EmbedBuilder()
@@ -48,6 +48,6 @@ module.exports = {
       )
       .setFooter({ text: `Total: ${list.length}` });
 
-    return interaction.reply({ embeds: [embed], ephemeral: true });
+    return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
   },
 };

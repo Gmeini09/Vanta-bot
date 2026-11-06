@@ -1,98 +1,90 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
-const config = require('../config');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const giveaways = require('../utils/giveaways');
 
+const EPH = MessageFlags.Ephemeral;
 const UNITS = { m: 60_000, h: 3_600_000, d: 86_400_000 };
-const EMOJI = '🎉';
 
 function parseDuration(raw) {
-  const m = raw.trim().toLowerCase().match(/^(\d+)(m|h|d)$/);
+  const m = raw.trim().toLowerCase().match(/^(\d+)\s*(m|h|d)$/);
   return m ? parseInt(m[1], 10) * UNITS[m[2]] : null;
-}
-
-async function pickWinners(message, count) {
-  const reaction = message.reactions.cache.get(EMOJI);
-  if (!reaction) return [];
-  const users = await reaction.users.fetch();
-  const entrants = [...users.values()].filter((u) => !u.bot);
-  const winners = [];
-  while (winners.length < count && entrants.length) {
-    winners.push(entrants.splice(Math.floor(Math.random() * entrants.length), 1)[0]);
-  }
-  return winners;
 }
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('giveaway')
-    .setDescription('Run a giveaway.')
+    .setDescription('Run giveaways.')
     .addSubcommand((s) =>
       s
         .setName('start')
-        .setDescription('Start a giveaway.')
-        .addStringOption((o) => o.setName('prize').setDescription('What is being given away').setRequired(true))
-        .addStringOption((o) => o.setName('duration').setDescription('e.g. 30m, 2h, 1d').setRequired(true))
+        .setDescription('Start a giveaway in this channel.')
+        .addStringOption((o) => o.setName('prize').setDescription('What is being given away').setRequired(true).setMaxLength(200))
+        .addStringOption((o) => o.setName('duration').setDescription('e.g. 30m, 2h, 1d (max 60d)').setRequired(true))
         .addIntegerOption((o) => o.setName('winners').setDescription('Number of winners (default 1)').setMinValue(1).setMaxValue(20)),
     )
     .addSubcommand((s) =>
       s
+        .setName('end')
+        .setDescription('End a running giveaway now.')
+        .addStringOption((o) => o.setName('message_id').setDescription('Giveaway message ID').setRequired(true)),
+    )
+    .addSubcommand((s) =>
+      s
         .setName('reroll')
-        .setDescription('Reroll the winner of a finished giveaway.')
-        .addStringOption((o) => o.setName('message_id').setDescription('The giveaway message ID').setRequired(true)),
+        .setDescription('Pick a new winner for a finished giveaway.')
+        .addStringOption((o) => o.setName('message_id').setDescription('Giveaway message ID').setRequired(true)),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
 
-    if (sub === 'reroll') {
-      const id = interaction.options.getString('message_id').trim();
-      const msg = await interaction.channel.messages.fetch(id).catch(() => null);
-      if (!msg) return interaction.reply({ content: 'Message not found in this channel.', ephemeral: true });
-      const [winner] = await pickWinners(msg, 1);
-      if (!winner) return interaction.reply({ content: 'No valid entrants to reroll.', ephemeral: true });
-      return interaction.reply({ content: `🎉 New winner: ${winner}! Congratulations!` });
-    }
+    if (sub === 'start') {
+      const prize = interaction.options.getString('prize');
+      const duration = parseDuration(interaction.options.getString('duration'));
+      const winners = interaction.options.getInteger('winners') || 1;
 
-    const prize = interaction.options.getString('prize');
-    const duration = parseDuration(interaction.options.getString('duration'));
-    const winnerCount = interaction.options.getInteger('winners') || 1;
-
-    if (!duration) {
-      return interaction.reply({ content: 'Invalid duration. Use e.g. `30m`, `2h`, `1d`.', ephemeral: true });
-    }
-
-    const endsAt = Math.floor((Date.now() + duration) / 1000);
-    const embed = new EmbedBuilder()
-      .setColor(config.brand.color)
-      .setTitle(`🎉 Giveaway: ${prize}`)
-      .setDescription(
-        `React with ${EMOJI} to enter!\n\n` +
-          `Winners: **${winnerCount}**\nEnds: <t:${endsAt}:R>\nHosted by: ${interaction.user}`,
-      )
-      .setTimestamp(Date.now() + duration);
-
-    await interaction.reply({ content: 'Giveaway started!', ephemeral: true });
-    const msg = await interaction.channel.send({ embeds: [embed] });
-    await msg.react(EMOJI);
-
-    setTimeout(async () => {
-      const fresh = await msg.fetch().catch(() => null);
-      if (!fresh) return;
-      const winners = await pickWinners(fresh, winnerCount);
-
-      const ended = EmbedBuilder.from(embed)
-        .setColor(config.brand.success)
-        .setDescription(
-          `Giveaway ended!\n\nPrize: **${prize}**\n` +
-            `Winners: ${winners.length ? winners.join(', ') : 'No valid entrants'}`,
-        );
-      await fresh.edit({ embeds: [ended] }).catch(() => {});
-
-      if (winners.length) {
-        await interaction.channel
-          .send(`🎉 Congratulations ${winners.join(', ')}! You won **${prize}**!`)
-          .catch(() => {});
+      if (!duration) {
+        return interaction.reply({ content: 'Invalid duration. Use e.g. `30m`, `2h`, `1d`.', flags: EPH });
       }
-    }, duration);
+      if (duration > 60 * UNITS.d) {
+        return interaction.reply({ content: 'Maximum duration is 60 days.', flags: EPH });
+      }
+
+      const data = {
+        guildId: interaction.guild.id,
+        channelId: interaction.channel.id,
+        prize,
+        winners,
+        hostId: interaction.user.id,
+        endsAt: Date.now() + duration,
+      };
+
+      await interaction.reply({ content: '🎉 Giveaway started!', flags: EPH });
+      const msg = await interaction.channel.send({ embeds: [giveaways.buildEmbed(data)] });
+      await msg.react(giveaways.EMOJI);
+      giveaways.create(interaction.client, msg.id, data);
+      return;
+    }
+
+    const id = interaction.options.getString('message_id').trim();
+    const g = giveaways.get(id);
+    if (!g) return interaction.reply({ content: 'No giveaway found with that message ID.', flags: EPH });
+
+    if (sub === 'end') {
+      if (g.ended) return interaction.reply({ content: 'That giveaway has already ended.', flags: EPH });
+      await interaction.reply({ content: 'Ending giveaway…', flags: EPH });
+      await giveaways.end(interaction.client, id);
+      return;
+    }
+
+    // reroll
+    if (!g.ended) return interaction.reply({ content: 'That giveaway is still running.', flags: EPH });
+    const channel = await interaction.client.channels.fetch(g.channelId).catch(() => null);
+    const msg = channel && (await channel.messages.fetch(id).catch(() => null));
+    if (!msg) return interaction.reply({ content: 'Could not find the giveaway message.', flags: EPH });
+
+    const [winner] = await giveaways.pickWinners(msg, 1, g.winnerIds || []);
+    if (!winner) return interaction.reply({ content: 'No other valid entrants to reroll.', flags: EPH });
+    return interaction.reply({ content: `${giveaways.EMOJI} New winner: ${winner}! You won **${g.prize}**!` });
   },
 };

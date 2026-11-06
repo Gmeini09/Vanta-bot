@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
 const modlog = require('../utils/modlog');
 
@@ -15,12 +15,12 @@ module.exports = {
     const reason = interaction.options.getString('reason') || 'No reason provided';
 
     if (!target) {
-      return interaction.reply({ content: 'That member is not in this server.', ephemeral: true });
+      return interaction.reply({ content: 'That member is not in this server.', flags: MessageFlags.Ephemeral });
     }
     if (!target.kickable) {
       return interaction.reply({
         content: "I can't kick that member (role hierarchy or missing permission).",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 

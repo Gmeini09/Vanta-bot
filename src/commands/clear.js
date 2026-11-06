@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const config = require('../config');
 const modlog = require('../utils/modlog');
 
@@ -18,7 +18,7 @@ module.exports = {
 
     let messages = await interaction.channel.messages.fetch({ limit: 100 }).catch(() => null);
     if (!messages) {
-      return interaction.reply({ content: 'Could not fetch messages.', ephemeral: true });
+      return interaction.reply({ content: 'Could not fetch messages.', flags: MessageFlags.Ephemeral });
     }
 
     if (user) messages = messages.filter((m) => m.author.id === user.id);
@@ -28,11 +28,11 @@ module.exports = {
     if (!deleted) {
       return interaction.reply({
         content: 'Could not delete. Messages older than 14 days cannot be bulk-deleted.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
-    await interaction.reply({ content: `Deleted **${deleted.size}** message(s).`, ephemeral: true });
+    await interaction.reply({ content: `Deleted **${deleted.size}** message(s).`, flags: MessageFlags.Ephemeral });
 
     modlog.log(interaction.guild, {
       action: '🧹 Messages cleared',

@@ -1,5 +1,6 @@
 const { Events, ActivityType, REST, Routes } = require('discord.js');
 const config = require('../config');
+const giveaways = require('../utils/giveaways');
 
 module.exports = {
   name: Events.ClientReady,
@@ -29,5 +30,8 @@ module.exports = {
     } catch (err) {
       console.error('[ready] Failed to register commands:', err);
     }
+
+    // Pick up giveaways that were running before a restart.
+    giveaways.resumeAll(client);
   },
 };

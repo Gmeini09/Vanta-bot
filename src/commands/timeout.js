@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
 const modlog = require('../utils/modlog');
 
@@ -20,18 +20,18 @@ module.exports = {
     const raw = interaction.options.getString('duration').trim().toLowerCase();
     const reason = interaction.options.getString('reason') || 'No reason provided';
 
-    if (!target) return interaction.reply({ content: 'That member is not here.', ephemeral: true });
+    if (!target) return interaction.reply({ content: 'That member is not here.', flags: MessageFlags.Ephemeral });
     if (!target.moderatable) {
-      return interaction.reply({ content: "I can't time out that member.", ephemeral: true });
+      return interaction.reply({ content: "I can't time out that member.", flags: MessageFlags.Ephemeral });
     }
 
     const match = raw.match(/^(\d+)(m|h|d)$/);
     if (!match) {
-      return interaction.reply({ content: 'Invalid duration. Use e.g. `10m`, `2h`, `1d`.', ephemeral: true });
+      return interaction.reply({ content: 'Invalid duration. Use e.g. `10m`, `2h`, `1d`.', flags: MessageFlags.Ephemeral });
     }
     const ms = parseInt(match[1], 10) * UNITS[match[2]];
     if (ms > 28 * UNITS.d) {
-      return interaction.reply({ content: 'Maximum timeout is 28 days.', ephemeral: true });
+      return interaction.reply({ content: 'Maximum timeout is 28 days.', flags: MessageFlags.Ephemeral });
     }
 
     await target.timeout(ms, reason);

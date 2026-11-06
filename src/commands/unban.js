@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const config = require('../config');
 const modlog = require('../utils/modlog');
 
@@ -15,12 +15,12 @@ module.exports = {
     const reason = interaction.options.getString('reason') || 'No reason provided';
 
     if (!/^\d{17,20}$/.test(id)) {
-      return interaction.reply({ content: 'That does not look like a valid user ID.', ephemeral: true });
+      return interaction.reply({ content: 'That does not look like a valid user ID.', flags: MessageFlags.Ephemeral });
     }
 
     const ban = await interaction.guild.bans.fetch(id).catch(() => null);
     if (!ban) {
-      return interaction.reply({ content: 'That user is not banned.', ephemeral: true });
+      return interaction.reply({ content: 'That user is not banned.', flags: MessageFlags.Ephemeral });
     }
 
     await interaction.guild.bans.remove(id, reason);

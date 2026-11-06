@@ -1,3 +1,4 @@
+const { MessageFlags } = require("discord.js");
 module.exports = {
   async toggleRole(interaction, roleId) {
     const member = interaction.member;
@@ -6,7 +7,7 @@ module.exports = {
     if (!role) {
       return interaction.reply({
         content: 'That role no longer exists. Ask an admin to update the panel.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -14,16 +15,16 @@ module.exports = {
     if (role.position >= me.roles.highest.position) {
       return interaction.reply({
         content: "I can't assign that role — my role must be above it.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
     if (member.roles.cache.has(roleId)) {
       await member.roles.remove(roleId);
-      return interaction.reply({ content: `Removed **${role.name}**.`, ephemeral: true });
+      return interaction.reply({ content: `Removed **${role.name}**.`, flags: MessageFlags.Ephemeral });
     }
 
     await member.roles.add(roleId);
-    return interaction.reply({ content: `Added **${role.name}**.`, ephemeral: true });
+    return interaction.reply({ content: `Added **${role.name}**.`, flags: MessageFlags.Ephemeral });
   },
 };

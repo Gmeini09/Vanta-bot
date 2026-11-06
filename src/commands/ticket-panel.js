@@ -1,35 +1,18 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-} = require('discord.js');
-const config = require('../config');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } = require('discord.js');
+const tickets = require('../tickets/manager');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ticket-panel')
-    .setDescription('Post the ticket panel in this channel.')
+    .setDescription('Post the ticket panel (category dropdown).')
+    .addChannelOption((o) =>
+      o.setName('channel').setDescription('Where to post it (defaults to here)').addChannelTypes(ChannelType.GuildText),
+    )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
 
   async execute(interaction) {
-    const embed = new EmbedBuilder()
-      .setColor(config.brand.color)
-      .setTitle('Support')
-      .setDescription('Need help or have a question? Open a ticket and our team will assist you.')
-      .setFooter({ text: config.brand.name });
-
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('ticket_open')
-        .setLabel('Open a ticket')
-        .setStyle(ButtonStyle.Primary)
-        .setEmoji('✉️'),
-    );
-
-    await interaction.channel.send({ embeds: [embed], components: [row] });
-    return interaction.reply({ content: 'Ticket panel posted.', ephemeral: true });
+    const channel = interaction.options.getChannel('channel') || interaction.channel;
+    await channel.send(tickets.buildPanel(interaction.guild));
+    return interaction.reply({ content: `✅ Ticket panel posted in ${channel}.`, flags: MessageFlags.Ephemeral });
   },
 };

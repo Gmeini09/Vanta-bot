@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,6 +10,6 @@ module.exports = {
   async execute(interaction) {
     const message = interaction.options.getString('message');
     await interaction.channel.send({ content: message, allowedMentions: { parse: [] } });
-    return interaction.reply({ content: 'Sent.', ephemeral: true });
+    return interaction.reply({ content: 'Sent.', flags: MessageFlags.Ephemeral });
   },
 };

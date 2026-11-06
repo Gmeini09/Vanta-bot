@@ -5,6 +5,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require('discord.js');
 const config = require('../config');
 
@@ -22,7 +23,7 @@ module.exports = {
         content:
           'No roles configured yet. Set the `ROLE_BUTTONS` env var (JSON of customId→roleId) ' +
           'or edit src/config.js, then restart the bot.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -44,6 +45,6 @@ module.exports = {
       .setFooter({ text: config.brand.name });
 
     await interaction.channel.send({ embeds: [embed], components: [row] });
-    return interaction.reply({ content: 'Role panel posted.', ephemeral: true });
+    return interaction.reply({ content: 'Role panel posted.', flags: MessageFlags.Ephemeral });
   },
 };
