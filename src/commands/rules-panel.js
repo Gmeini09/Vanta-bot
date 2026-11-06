@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } = require('discord.js');
 const settings = require('../utils/settings');
 const { buildRulesPanel } = require('../handlers/rules');
+const panels = require('../server/panels');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,7 +14,8 @@ module.exports = {
 
   async execute(interaction) {
     const channel = interaction.options.getChannel('channel') || interaction.channel;
-    await channel.send(buildRulesPanel(interaction.guild));
+    const msg = await channel.send(buildRulesPanel(interaction.guild));
+    panels.register(interaction.guild.id, 'rules', channel.id, msg.id);
 
     const roleId = settings.get(interaction.guild.id, 'verifiedRoleId');
     const note = roleId
