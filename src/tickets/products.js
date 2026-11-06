@@ -8,9 +8,9 @@ module.exports = {
     { key: 'kernel', label: 'Kernel', emoji: '🛒', description: 'Kernel version' },
   ],
   durations: [
-    { key: '1d', label: '1 Day' },
-    { key: '1w', label: '1 Week' },
     { key: '1m', label: '1 Month' },
+    { key: '3m', label: '3 Months' },
+    { key: '6m', label: '6 Months' },
     { key: 'lifetime', label: 'Lifetime' },
   ],
 };
