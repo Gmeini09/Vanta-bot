@@ -11,6 +11,7 @@ function envDefaults() {
     leaveChannelId: config.leave.channelId,
     modLogChannelId: config.modLogChannelId,
     autoRoleId: config.autoRoleId,
+    verifiedRoleId: process.env.VERIFIED_ROLE_ID || '',
     ticketCategoryId: config.tickets.categoryId,
     ticketSupportRoleId: config.tickets.supportRoleId,
     ticketLogChannelId: config.tickets.logChannelId,

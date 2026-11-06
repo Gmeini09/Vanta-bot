@@ -4,7 +4,7 @@ const config = require('../config');
 const CATEGORIES = {
   '🛠️ Utility': ['/help', '/ping', '/userinfo', '/serverinfo', '/avatar', '/poll'],
   '🎫 Tickets': ['/ticket close', '/ticket add', '/ticket remove', '/ticket rename', '/ticket-panel'],
-  '🎟️ Roles': ['/role-panel'],
+  '🎟️ Panels': ['/rules-panel', '/role-panel'],
   '🛡️ Moderation': [
     '/kick', '/ban', '/unban', '/timeout', '/untimeout',
     '/warn', '/warnings', '/clear', '/slowmode', '/lock', '/unlock',

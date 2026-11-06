@@ -11,6 +11,7 @@ const {
 const config = require('../config');
 const settings = require('../utils/settings');
 const tickets = require('../tickets/manager');
+const { buildRulesPanel } = require('../handlers/rules');
 
 const P = PermissionFlagsBits;
 
@@ -27,23 +28,27 @@ const ROLES = [
     setting: 'ticketSupportRoleId',
     permissions: [P.ManageMessages, P.KickMembers, P.ModerateMembers, P.MuteMembers, P.MoveMembers],
   },
-  { key: 'member', name: '👤 Member', color: 0x9B59B6, hoist: false, setting: 'autoRoleId', permissions: [] },
+  // Members get this role by accepting the rules (rules panel button).
+  { key: 'member', name: '👤 Member', color: 0x9B59B6, hoist: false, setting: 'verifiedRoleId', permissions: [] },
 ];
 
-// access: 'public' (default) | 'readonly' (only staff can write) | 'staff' (only staff can see)
+// access: 'public' (default) | 'members' (only after accepting the rules) | 'staff' (only staff can see)
+// readonly: only staff (and the bot) can write
 // setting: store the created channel's ID in the bot settings
-// panel: 'tickets' posts the ticket panel there
+// panel: 'tickets' / 'rules' posts that panel there
 const CATEGORIES = [
   {
     name: '🏠 WELCOME',
+    readonly: true,
     channels: [
-      { name: '📜│rules', access: 'readonly' },
-      { name: '📢│announcements', access: 'readonly' },
-      { name: '👋│welcome', access: 'readonly', setting: ['welcomeChannelId', 'leaveChannelId'] },
+      { name: '📜│rules', panel: 'rules' },
+      { name: '📢│announcements' },
+      { name: '👋│welcome', setting: ['welcomeChannelId', 'leaveChannelId'] },
     ],
   },
   {
     name: '💬 COMMUNITY',
+    access: 'members',
     channels: [
       { name: '💬│general', main: true },
       { name: '🖼️│media' },
@@ -53,7 +58,8 @@ const CATEGORIES = [
   },
   {
     name: '🎫 SUPPORT',
-    channels: [{ name: '🎫│open-a-ticket', access: 'readonly', panel: 'tickets' }],
+    access: 'members',
+    channels: [{ name: '🎫│open-a-ticket', readonly: true, panel: 'tickets' }],
   },
   {
     name: '📂 TICKETS',
@@ -63,6 +69,7 @@ const CATEGORIES = [
   },
   {
     name: '🔊 VOICE',
+    access: 'members',
     channels: [
       { name: '🔊 General', type: ChannelType.GuildVoice },
       { name: '🎮 Gaming', type: ChannelType.GuildVoice },
@@ -82,26 +89,36 @@ const CATEGORIES = [
 ];
 // ------------------------------------------------------------------------
 
-function overwritesFor(access, guild, roles) {
+function overwritesFor(access, readonly, guild, roles) {
   const me = guild.members.me.id;
   const everyone = guild.roles.everyone.id;
   const staffIds = [roles.admin?.id, roles.staff?.id].filter(Boolean);
+  const STAFF_ALLOW = [P.ViewChannel, P.SendMessages, P.ReadMessageHistory, P.Connect];
+  const BOT_ALLOW = [P.ViewChannel, P.SendMessages, P.EmbedLinks, P.ManageChannels, P.ReadMessageHistory, P.Connect];
+  const WRITE = [P.SendMessages, P.CreatePublicThreads, P.CreatePrivateThreads, P.AddReactions];
 
   if (access === 'staff') {
     return [
       { id: everyone, deny: [P.ViewChannel] },
-      ...staffIds.map((id) => ({ id, allow: [P.ViewChannel, P.SendMessages, P.ReadMessageHistory, P.Connect] })),
-      { id: me, allow: [P.ViewChannel, P.SendMessages, P.ManageChannels, P.ReadMessageHistory, P.Connect] },
+      ...staffIds.map((id) => ({ id, allow: STAFF_ALLOW })),
+      { id: me, allow: BOT_ALLOW },
     ];
   }
-  if (access === 'readonly') {
-    return [
-      { id: everyone, deny: [P.SendMessages, P.CreatePublicThreads, P.CreatePrivateThreads, P.AddReactions] },
-      ...staffIds.map((id) => ({ id, allow: [P.SendMessages] })),
-      { id: me, allow: [P.ViewChannel, P.SendMessages, P.EmbedLinks] },
-    ];
+
+  const everyoneDeny = [];
+  if (access === 'members') everyoneDeny.push(P.ViewChannel);
+  if (readonly) everyoneDeny.push(...WRITE);
+
+  const list = [];
+  if (everyoneDeny.length) list.push({ id: everyone, deny: everyoneDeny });
+  if (access === 'members' && roles.member) {
+    list.push(readonly ? { id: roles.member.id, allow: [P.ViewChannel], deny: WRITE } : { id: roles.member.id, allow: [P.ViewChannel] });
   }
-  return [];
+  if (list.length) {
+    list.push(...staffIds.map((id) => ({ id, allow: STAFF_ALLOW })));
+    list.push({ id: me, allow: BOT_ALLOW });
+  }
+  return list;
 }
 
 module.exports = {
@@ -187,12 +204,13 @@ module.exports = {
     let createdChannels = 0;
     let mainChannel = null;
     let panelChannel = null;
+    let rulesChannel = null;
     for (const cat of CATEGORIES) {
       const parent = await guild.channels
         .create({
           name: cat.name,
           type: ChannelType.GuildCategory,
-          permissionOverwrites: overwritesFor(cat.access, guild, roles),
+          permissionOverwrites: overwritesFor(cat.access, cat.readonly, guild, roles),
           reason: 'Server setup',
         })
         .catch(() => null);
@@ -205,7 +223,7 @@ module.exports = {
             name: ch.name,
             type: ch.type ?? ChannelType.GuildText,
             parent: parent.id,
-            permissionOverwrites: overwritesFor(ch.access || cat.access, guild, roles),
+            permissionOverwrites: overwritesFor(ch.access || cat.access, ch.readonly ?? cat.readonly, guild, roles),
             reason: 'Server setup',
           })
           .catch(() => null);
@@ -214,15 +232,22 @@ module.exports = {
         for (const key of [].concat(ch.setting || [])) saved[key] = created.id;
         if (ch.main) mainChannel = created;
         if (ch.panel === 'tickets') panelChannel = created;
+        if (ch.panel === 'rules') rulesChannel = created;
       }
     }
     log.push(`✨ Created **${createdChannels}** channel(s) in **${CATEGORIES.length}** categories`);
 
-    // 5) Save settings so welcome, logs, tickets and auto-role work right away
+    // 5) Save settings so welcome, logs, tickets and rules work right away.
+    //    New members get the Member role by accepting the rules, not on join.
+    saved.autoRoleId = '';
     settings.set(guild.id, saved);
-    log.push('⚙️ Saved settings (welcome, logs, tickets, auto-role)');
+    log.push('⚙️ Saved settings (welcome, logs, tickets, verified role)');
 
-    // 6) Post the ticket panel
+    // 6) Post the rules panel and the ticket panel
+    if (rulesChannel) {
+      const ok = await rulesChannel.send(buildRulesPanel(guild)).then(() => true).catch(() => false);
+      if (ok) log.push(`📜 Rules panel posted in ${rulesChannel}`);
+    }
     if (panelChannel) {
       const ok = await panelChannel.send(tickets.buildPanel(guild)).then(() => true).catch(() => false);
       if (ok) log.push(`🎫 Ticket panel posted in ${panelChannel}`);
@@ -254,7 +279,7 @@ module.exports = {
         .catch(() => {});
     }
 
-    // 8) Give every existing member the Member role (in the background)
+    // 8) Existing members keep access: give them the Member role (in the background)
     if (roles.member) {
       const members = await guild.members.fetch().catch(() => null);
       if (members) {

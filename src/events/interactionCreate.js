@@ -1,6 +1,7 @@
 const { Events, MessageFlags } = require('discord.js');
 const config = require('../config');
 const roles = require('../handlers/roles');
+const rules = require('../handlers/rules');
 const tickets = require('../tickets/manager');
 
 module.exports = {
@@ -32,6 +33,10 @@ module.exports = {
         const id = interaction.customId;
         if (config.roleButtons[id]) {
           await roles.toggleRole(interaction, config.roleButtons[id]);
+          return;
+        }
+        if (id === 'rules_accept') {
+          await rules.onAccept(interaction);
           return;
         }
         if (id.startsWith('ticket_')) {
