@@ -21,30 +21,30 @@ const ROLES = [
 
 const CATEGORIES = [
   {
-    name: 'WELCOME',
+    name: '🏠 WELCOME',
     channels: [
-      { name: 'rules', type: ChannelType.GuildText },
-      { name: 'announcements', type: ChannelType.GuildText },
-      { name: 'welcome', type: ChannelType.GuildText },
+      { name: '📜│rules', type: ChannelType.GuildText },
+      { name: '📢│announcements', type: ChannelType.GuildText },
+      { name: '👋│welcome', type: ChannelType.GuildText },
     ],
   },
   {
-    name: 'COMMUNITY',
+    name: '💬 COMMUNITY',
     channels: [
-      { name: 'general', type: ChannelType.GuildText },
-      { name: 'media', type: ChannelType.GuildText },
-      { name: 'off-topic', type: ChannelType.GuildText },
+      { name: '💬│general', type: ChannelType.GuildText },
+      { name: '🖼️│media', type: ChannelType.GuildText },
+      { name: '😎│off-topic', type: ChannelType.GuildText },
     ],
   },
   {
-    name: 'SUPPORT',
-    channels: [{ name: 'tickets', type: ChannelType.GuildText }],
+    name: '🎫 SUPPORT',
+    channels: [{ name: '🎫│tickets', type: ChannelType.GuildText }],
   },
   {
-    name: 'VOICE',
+    name: '🔊 VOICE',
     channels: [
-      { name: 'General', type: ChannelType.GuildVoice },
-      { name: 'Music', type: ChannelType.GuildVoice },
+      { name: '🔊 General', type: ChannelType.GuildVoice },
+      { name: '🎵 Music', type: ChannelType.GuildVoice },
     ],
   },
 ];
