@@ -10,6 +10,7 @@ module.exports = {
     { emoji: '🔒', title: 'Respect privacy', text: "Don't share anyone's personal information — including your own." },
     { emoji: '💬', title: 'Use the right channels', text: 'Keep conversations on-topic for each channel.' },
     { emoji: '🛡️', title: 'Follow Discord\'s rules', text: 'The [Terms of Service](https://discord.com/terms) and [Community Guidelines](https://discord.com/guidelines) apply here.' },
+    { emoji: '💸', title: 'No refunds', text: 'All purchases are final. Once a payment has been made, no refunds will be issued.' },
     { emoji: '👮', title: 'Listen to staff', text: 'Staff decisions are final. Disagree? Open a ticket instead of arguing in chat.' },
   ],
   footer: 'By verifying, you agree to follow these rules. Breaking them can lead to a warning, timeout or ban.',
