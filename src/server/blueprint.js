@@ -65,7 +65,6 @@ const CATEGORIES = [
     channels: [
       { key: 'public', name: '🛒│public' },
       { key: 'private', name: '🛒│private' },
-      { key: 'kernel', name: '🛒│kernel' },
     ],
   },
   // Ticket channels are created in here (purchase tickets get their own category).
@@ -86,6 +85,10 @@ const CATEGORIES = [
     ],
   },
 ];
+
+// Channels that were removed from the layout. The sync deletes them once
+// (looked up by the ID it stored for `category.channel`).
+const REMOVED = ['product.kernel'];
 
 function overwritesFor(access, readonly, guild, roles) {
   const me = guild.members.me.id;
@@ -133,4 +136,4 @@ function overwritesFor(access, readonly, guild, roles) {
   return list;
 }
 
-module.exports = { ROLES, CATEGORIES, overwritesFor };
+module.exports = { ROLES, CATEGORIES, REMOVED, overwritesFor };

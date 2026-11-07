@@ -5,7 +5,7 @@ const { ChannelType } = require('discord.js');
 const store = require('../utils/store');
 const settings = require('../utils/settings');
 const panels = require('./panels');
-const { ROLES, CATEGORIES, overwritesFor } = require('./blueprint');
+const { ROLES, CATEGORIES, REMOVED, overwritesFor } = require('./blueprint');
 
 const LAYOUT = 'layout';
 
@@ -166,6 +166,18 @@ async function syncServer(guild, { resetPermissions = false } = {}) {
   if (actualCats.join() !== cats.map((c) => c.id).join()) {
     await guild.channels.setPositions(cats.map((c, i) => ({ channel: c.id, position: i }))).catch(() => {});
     report.updated.push('category order');
+  }
+
+  // Delete channels that were taken out of the layout.
+  for (const id of REMOVED) {
+    const channel = guild.channels.cache.get(layout.channels[id]);
+    if (channel?.deletable) {
+      const name = channel.name;
+      if (await channel.delete('Removed from Vanta layout').then(() => true).catch(() => false)) {
+        report.updated.push(`deleted ${name}`);
+      }
+    }
+    if (!channel || !guild.channels.cache.has(channel.id)) delete layout.channels[id];
   }
 
   saveLayout(guild.id, layout);
