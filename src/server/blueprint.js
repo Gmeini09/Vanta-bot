@@ -64,7 +64,7 @@ const CATEGORIES = [
     readonly: true,
     channels: [
       { key: 'public', name: '🛒│public' },
-      { key: 'private', name: '🛒│private' },
+      { key: 'private', name: '🛒│private', panel: 'plan-private' },
     ],
   },
   // Ticket channels are created in here (purchase tickets get their own category).

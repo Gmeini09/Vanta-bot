@@ -3,11 +3,13 @@
 const store = require('../utils/store');
 
 const NAME = 'panels';
-const MARKERS = { rules: ['rules_accept'], tickets: ['ticket_select', 'ticket_open'], verify: [] };
+const MARKERS = { rules: ['rules_accept'], tickets: ['ticket_select', 'ticket_open'], verify: [], 'plan-private': [] };
 
 const hasMarker = (m, type) =>
   type === 'verify'
     ? require('../handlers/verify').isVerifyPanel(m)
+    : type.startsWith('plan-')
+    ? require('../handlers/plans').isPlanPanel(type.slice(5))(m)
     : m.components.some((row) => row.components?.some((c) => MARKERS[type].includes(c.customId)));
 
 // The verify panel works with a reaction the bot keeps on the message.
@@ -19,6 +21,7 @@ function build(type, guild) {
   if (type === 'rules') return require('../handlers/rules').buildRulesPanel(guild);
   if (type === 'tickets') return require('../tickets/manager').buildPanel(guild);
   if (type === 'verify') return require('../handlers/verify').buildVerifyPanel(guild);
+  if (type.startsWith('plan-')) return require('../handlers/plans').buildPlanPanel(type.slice(5), guild);
   return null;
 }
 
