@@ -62,9 +62,9 @@ async function findExisting(channel, type) {
   );
 }
 
-// Plan panels are never edited (no "(edited)" tag): if the text changed, or the
+// Panels are never edited (no "(edited)" tag): if the text changed, or the
 // message was edited before, the old one is deleted and a fresh one is posted.
-const repostOnly = (type) => type.startsWith('plan-');
+const repostOnly = () => true;
 const sig = (e) => JSON.stringify([e?.title, e?.description, e?.color, e?.footer?.text]);
 function upToDate(message, payload) {
   return !message.editedTimestamp && sig(message.embeds?.[0]?.data ?? message.embeds?.[0]) === sig(payload.embeds?.[0]?.data);

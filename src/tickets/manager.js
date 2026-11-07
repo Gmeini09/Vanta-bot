@@ -492,14 +492,16 @@ async function onShopOpen(interaction) {
 async function onModal(interaction) {
   const cat = CATEGORIES.find((c) => c.key === interaction.customId.split(':')[1]);
   if (!cat) return;
-  await interaction.deferReply({ flags: EPH });
-
-  // Reset the panel dropdown so the same option can be picked again.
-  if (interaction.message) interaction.message.edit(buildPanel(interaction.guild)).catch(() => {});
+  // Reset the panel dropdown so the same option can be picked again. A component
+  // update (unlike a message edit) doesn't mark the panel as "(edited)".
+  const fromPanel = Boolean(interaction.isFromMessage?.());
+  if (fromPanel) await interaction.update(buildPanel(interaction.guild));
+  else await interaction.deferReply({ flags: EPH });
+  const say = (content) => (fromPanel ? interaction.followUp({ content, flags: EPH }) : interaction.editReply(content));
 
   const open = findOpenTickets(interaction.guild, interaction.user.id);
   if (open.length >= MAX_OPEN_PER_USER) {
-    return interaction.editReply(`You already have an open ticket: ${open[0]}`);
+    return say(`You already have an open ticket: ${open[0]}`);
   }
 
   const answers = cat.questions.slice(0, 5).map((q) => ({
@@ -509,10 +511,10 @@ async function onModal(interaction) {
 
   try {
     const channel = await createTicket(interaction, cat, answers);
-    return interaction.editReply(`✅ Your ticket has been created: ${channel}`);
+    return say(`✅ Your ticket has been created: ${channel}`);
   } catch (err) {
     console.error('[tickets] create failed:', err);
-    return interaction.editReply(
+    return say(
       "❌ I couldn't create your ticket. Make sure I have the **Manage Channels** permission and my role is high enough.",
     );
   }
