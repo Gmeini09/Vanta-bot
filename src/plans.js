@@ -5,9 +5,9 @@ module.exports = {
     title: '🛒 Private Plan',
     features: ['Usermode'],
     pricing: [
-      { label: '1 Month', prices: ['90 USD', '80 EURO'] },
-      { label: '3 Months', prices: ['150 USD', '130 EURO'] },
-      { label: '6 Months', prices: ['200 USD', '180 EURO'] },
+      { label: '1 Month', prices: ['70 USD', '60 EURO'] },
+      { label: '3 Months', prices: ['130 USD', '110 EURO'] },
+      { label: '6 Months', prices: ['180 USD', '160 EURO'] },
     ],
   },
 };
