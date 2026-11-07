@@ -62,6 +62,14 @@ async function findExisting(channel, type) {
   );
 }
 
+// Plan panels are never edited (no "(edited)" tag): if the text changed, or the
+// message was edited before, the old one is deleted and a fresh one is posted.
+const repostOnly = (type) => type.startsWith('plan-');
+const sig = (e) => JSON.stringify([e?.title, e?.description, e?.color, e?.footer?.text]);
+function upToDate(message, payload) {
+  return !message.editedTimestamp && sig(message.embeds?.[0]?.data ?? message.embeds?.[0]) === sig(payload.embeds?.[0]?.data);
+}
+
 // Posts the panel in `channel`, or updates the one that is already there.
 // Returns 'updated' | 'posted' | null.
 async function ensure(guild, type, channel) {
@@ -70,6 +78,15 @@ async function ensure(guild, type, channel) {
 
   let message = entry ? await channel.messages.fetch(entry.messageId).catch(() => null) : null;
   if (!message) message = await findExisting(channel, type);
+
+  if (message && repostOnly(type)) {
+    if (upToDate(message, payload)) {
+      register(guild.id, type, channel.id, message.id);
+      return null;
+    }
+    await message.delete().catch(() => {});
+    message = null;
+  }
 
   if (message) {
     const ok = await message.edit(payload).then(() => true).catch(() => false);
@@ -96,6 +113,10 @@ async function refreshAll(guild) {
       const message = channel && (await channel.messages.fetch(e.messageId).catch(() => null));
       if (!message) {
         unregister(guild.id, type, e.messageId);
+        continue;
+      }
+      if (repostOnly(type)) {
+        if (!upToDate(message, build(type, guild)) && (await ensure(guild, type, channel))) count++;
         continue;
       }
       if (await message.edit(build(type, guild)).then(() => true).catch(() => false)) {

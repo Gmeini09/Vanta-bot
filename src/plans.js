@@ -5,8 +5,8 @@ module.exports = {
     title: '🛒 Public Plan',
     features: ['Usermode'],
     pricing: [
-      { label: '1 Month', prices: ['45 EURO'] },
-      { label: 'Lifetime', prices: ['100 EURO'] },
+      { label: '1 Month', prices: ['55 USD', '45 EURO'] },
+      { label: 'Lifetime', prices: ['120 USD', '100 EURO'] },
     ],
   },
   private: {
