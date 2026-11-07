@@ -6,7 +6,7 @@ function buildPlanPanel(key, guild) {
   const plan = PLANS[key];
   const list = (items) => items.map((i) => `• ${i}`).join('\n');
   const embed = new EmbedBuilder()
-    .setColor(config.brand.warn)
+    .setColor(config.brand.color)
     .setTitle(plan.title)
     .setDescription(
       `*Features*\n\n${list(plan.features)}\n\n` +
