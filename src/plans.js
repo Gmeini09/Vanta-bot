@@ -1,6 +1,14 @@
 // Product plan embeds posted in the product channels. Edit freely — the bot
 // updates the posted message on the next start.
 module.exports = {
+  public: {
+    title: '🛒 Public Plan',
+    features: ['Usermode'],
+    pricing: [
+      { label: '1 Month', prices: ['45 EURO'] },
+      { label: 'Lifetime', prices: ['100 EURO'] },
+    ],
+  },
   private: {
     title: '🛒 Private Plan',
     features: ['Usermode'],

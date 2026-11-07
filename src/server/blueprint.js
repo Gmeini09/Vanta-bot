@@ -63,7 +63,7 @@ const CATEGORIES = [
     access: 'members',
     readonly: true,
     channels: [
-      { key: 'public', name: '🛒│public' },
+      { key: 'public', name: '🛒│public', panel: 'plan-public' },
       { key: 'private', name: '🛒│private', panel: 'plan-private' },
     ],
   },

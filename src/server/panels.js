@@ -3,7 +3,7 @@
 const store = require('../utils/store');
 
 const NAME = 'panels';
-const MARKERS = { rules: ['rules_accept'], tickets: ['ticket_select', 'ticket_open'], verify: [], 'plan-private': [] };
+const MARKERS = { rules: ['rules_accept'], tickets: ['ticket_select', 'ticket_open'], verify: [], 'plan-private': [], 'plan-public': [] };
 
 const hasMarker = (m, type) =>
   type === 'verify'
