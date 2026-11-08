@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1360" height="544" viewBox="0 0 1360 544"><defs>
+<linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3E8FF"/><stop offset=".45" stop-color="#C084FC"/><stop offset="1" stop-color="#7C3AED"/></linearGradient>
+<linearGradient id="t1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E9D5FF"/></linearGradient>
+<filter id="glow1" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="soft1" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs><rect width="100%" height="100%" fill="#07050D"/><radialGradient id="rg" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#2E1065" stop-opacity=".9"/><stop offset="1" stop-color="#07050D" stop-opacity="0"/></radialGradient><rect width="100%" height="100%" fill="url(#rg)"/>
+  <g transform="translate(250 152) scale(1.2)"><g filter="url(#glow1)" fill="url(#g1)">
+   <path d="M20 30 L78 30 L100 120 L88 168 Z"/>
+   <path d="M180 30 L122 30 L100 120 L112 168 Z" opacity=".85"/>
+   <path d="M100 6 L114 24 L100 42 L86 24 Z" fill="#F5D0FE"/></g></g><text x="540" y="322" font-family="Inter Display" font-weight="900" font-size="150" letter-spacing="12" fill="url(#t1)" filter="url(#soft1)">VΛNTΛ</text></svg>
