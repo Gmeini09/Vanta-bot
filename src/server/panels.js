@@ -65,7 +65,7 @@ async function findExisting(channel, type) {
 // Panels are never edited (no "(edited)" tag): if the text changed, or the
 // message was edited before, the old one is deleted and a fresh one is posted.
 const repostOnly = () => true;
-const sig = (e) => JSON.stringify([e?.title, e?.description, e?.color, e?.footer?.text]);
+const sig = (e) => JSON.stringify([e?.title, e?.description, e?.color, e?.footer?.text, e?.thumbnail?.url?.split("?")[0]]);
 function upToDate(message, payload) {
   return !message.editedTimestamp && sig(message.embeds?.[0]?.data ?? message.embeds?.[0]) === sig(payload.embeds?.[0]?.data);
 }
