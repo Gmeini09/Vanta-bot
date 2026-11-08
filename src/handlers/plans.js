@@ -9,7 +9,7 @@ function buildPlanPanel(key, guild) {
     .setColor(config.brand.color)
     .setTitle(plan.title)
     .setDescription(
-      `*Features*\n\n${list(plan.features)}\n\n` +
+      (plan.features?.length ? `*Features*\n\n${list(plan.features)}\n\n` : '') +
         `*Pricing:*\n\n` +
         plan.pricing.map((p) => `*${p.label}*\n${list(p.prices)}`).join('\n\n') +
         '\n\nTo buy, open a **Purchase** ticket.',

@@ -3,7 +3,7 @@
 module.exports = {
   public: {
     title: '🛒 Public Plan',
-    features: ['Usermode'],
+    features: [],
     pricing: [
       { label: '1 Month', prices: ['55 USD', '45 EURO'] },
       { label: 'Lifetime', prices: ['120 USD', '100 EURO'] },
@@ -11,7 +11,7 @@ module.exports = {
   },
   private: {
     title: '🛒 Private Plan',
-    features: ['Usermode'],
+    features: [],
     pricing: [
       { label: '1 Month', prices: ['70 USD', '60 EURO'] },
       { label: '3 Months', prices: ['130 USD', '110 EURO'] },
