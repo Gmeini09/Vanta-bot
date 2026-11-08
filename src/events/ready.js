@@ -2,6 +2,7 @@ const { Events, ActivityType, REST, Routes } = require('discord.js');
 const config = require('../config');
 const giveaways = require('../utils/giveaways');
 const panels = require('../server/panels');
+const { syncAvatar } = require('../utils/logo');
 const { syncServer, isManaged } = require('../server/sync');
 
 module.exports = {
@@ -32,6 +33,9 @@ module.exports = {
     } catch (err) {
       console.error('[ready] Failed to register commands:', err);
     }
+
+    // Use assets/logo.png as the bot's profile picture.
+    await syncAvatar(client);
 
     // Pick up giveaways that were running before a restart.
     giveaways.resumeAll(client);

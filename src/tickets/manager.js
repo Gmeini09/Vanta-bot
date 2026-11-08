@@ -118,7 +118,7 @@ function buildPanel(guild) {
         CATEGORIES.map((c) => `**${c.label}**\n${c.description}`).join('\n\n'),
     )
     .setFooter({ text: `${config.brand.name} • Please don't open tickets without a reason` });
-  const icon = guild?.iconURL({ size: 256 });
+  const icon = guild?.client.user.displayAvatarURL({ size: 256 }) || guild?.iconURL({ size: 256 });
   if (icon) embed.setThumbnail(icon);
 
   const menu = new StringSelectMenuBuilder()

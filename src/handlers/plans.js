@@ -15,7 +15,7 @@ function buildPlanPanel(key, guild) {
         '\n\nTo buy, open a **Purchase** ticket.',
     )
     .setFooter({ text: `${config.brand.name} • No refunds once paid` });
-  const icon = guild?.iconURL({ size: 256 });
+  const icon = guild?.client.user.displayAvatarURL({ size: 256 }) || guild?.iconURL({ size: 256 });
   if (icon) embed.setThumbnail(icon);
   return { embeds: [embed], components: [] };
 }

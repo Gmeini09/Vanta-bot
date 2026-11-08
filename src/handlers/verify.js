@@ -18,7 +18,7 @@ function buildVerifyPanel(guild) {
         'By verifying you agree to the rules.',
     )
     .setFooter({ text: config.brand.name });
-  const icon = guild?.iconURL({ size: 256 });
+  const icon = guild?.client.user.displayAvatarURL({ size: 256 }) || guild?.iconURL({ size: 256 });
   if (icon) embed.setThumbnail(icon);
   return { embeds: [embed], components: [] };
 }

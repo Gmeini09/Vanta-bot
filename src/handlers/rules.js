@@ -14,7 +14,7 @@ function buildRulesPanel(guild) {
         RULES.rules.map((r, i) => `**${i + 1}. ${r.emoji} ${r.title}**\n${r.text}`).join('\n\n'),
     )
     .setFooter({ text: RULES.footer });
-  const icon = guild?.iconURL({ size: 256 });
+  const icon = guild?.client.user.displayAvatarURL({ size: 256 }) || guild?.iconURL({ size: 256 });
   if (icon) embed.setThumbnail(icon);
 
   // Verification happens in the verify channel (react with ✅), so no button here.
