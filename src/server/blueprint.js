@@ -8,7 +8,7 @@ const { PermissionFlagsBits: P, ChannelType } = require('discord.js');
 
 // Roles: the first entry ends up highest. `setting` stores the role ID in the bot settings.
 const ROLES = [
-  { key: 'admin', name: '👑 Admin', color: 0xE74C3C, hoist: true, permissions: [P.Administrator] },
+  { key: 'admin', name: '💻 DEV', color: 0xE74C3C, hoist: true, permissions: [P.Administrator] },
   {
     key: 'staff',
     name: '🛡️ Staff',
