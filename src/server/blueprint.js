@@ -44,6 +44,7 @@ const CATEGORIES = [
     readonly: true,
     channels: [
       { key: 'info', name: '❗│info', main: true },
+      { key: 'status', name: '🟢│status' },
       { key: 'giveaway', name: '🎉│giveaway' },
       { key: 'showcase', name: '📷│showcase' },
       { key: 'ref-bypass', name: '✍️│proof' },
