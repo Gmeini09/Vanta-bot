@@ -2,7 +2,7 @@ const { Events, ActivityType, REST, Routes } = require('discord.js');
 const config = require('../config');
 const giveaways = require('../utils/giveaways');
 const panels = require('../server/panels');
-const { syncAvatar } = require('../utils/logo');
+const { syncAvatar, syncGuildArt } = require('../utils/logo');
 const { syncServer, isManaged } = require('../server/sync');
 
 module.exports = {
@@ -45,6 +45,7 @@ module.exports = {
     for (const guild of client.guilds.cache.values()) {
       try {
         if (isManaged(guild)) {
+          await syncGuildArt(guild);
           const { report } = await syncServer(guild);
           console.log(
             `[sync] ${guild.name}: ${report.created.length} created, ${report.updated.length} updated, ${report.panels.length} panel(s)`,

@@ -33,4 +33,38 @@ async function syncAvatar(client) {
   }
 }
 
-module.exports = { syncAvatar };
+// Server banner (needs boost level 2) and server icon, set once per file change.
+const GUILD_ITEMS = [
+  { file: 'server-banner.png', key: 'banner', feature: 'BANNER', set: (g, d) => g.setBanner(d, 'Vanta logo') },
+  { file: 'logo.png', key: 'icon', set: (g, d) => g.setIcon(d, 'Vanta logo') },
+];
+
+async function syncGuildArt(guild) {
+  for (const item of GUILD_ITEMS) {
+    if (item.feature && !guild.features.includes(item.feature)) {
+      console.log(`[logo] ${guild.name}: no ${item.key} (server needs boost level 2).`);
+      continue;
+    }
+    let data;
+    try {
+      data = fs.readFileSync(path.join(ASSETS, item.file));
+    } catch {
+      continue;
+    }
+    const hash = crypto.createHash('sha1').update(data).digest('hex');
+    const meta = store.read('meta');
+    const done = meta.guildArt?.[guild.id]?.[item.key];
+    if (done === hash) continue;
+    try {
+      await item.set(guild, data);
+      const m = store.read('meta');
+      m.guildArt = { ...m.guildArt, [guild.id]: { ...m.guildArt?.[guild.id], [item.key]: hash } };
+      store.write('meta', m);
+      console.log(`[logo] ${guild.name}: server ${item.key} updated.`);
+    } catch (err) {
+      console.error(`[logo] ${guild.name}: could not update server ${item.key}:`, err.message);
+    }
+  }
+}
+
+module.exports = { syncAvatar, syncGuildArt };
