@@ -5,17 +5,17 @@ module.exports = {
     title: '🛒 Public Plan',
     features: [],
     pricing: [
-      { label: '1 Month', prices: ['55 USD', '45 EURO'] },
-      { label: 'Lifetime', prices: ['120 USD', '100 EURO'] },
+      { label: '1 Month', prices: ['40 USD', '30 EURO'] },
+      { label: 'Lifetime', prices: ['105 USD', '85 EURO'] },
     ],
   },
   private: {
     title: '🛒 Private Plan',
     features: [],
     pricing: [
-      { label: '1 Month', prices: ['70 USD', '60 EURO'] },
-      { label: '3 Months', prices: ['130 USD', '110 EURO'] },
-      { label: '6 Months', prices: ['180 USD', '160 EURO'] },
+      { label: '1 Month', prices: ['55 USD', '45 EURO'] },
+      { label: '3 Months', prices: ['115 USD', '95 EURO'] },
+      { label: '6 Months', prices: ['165 USD', '145 EURO'] },
     ],
   },
 };
