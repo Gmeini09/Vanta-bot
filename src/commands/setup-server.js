@@ -55,7 +55,7 @@ module.exports = {
         time: 30_000,
       });
     } catch {
-      return interaction.editReply({ content: 'Timed out — no changes made.', embeds: [], components: [] });
+      return interaction.editReply({ content: 'Timed out — no changes made.', embeds: [], components: [] }).catch(() => {});
     }
     if (choice.customId === 'setup_cancel') {
       return choice.update({ content: 'Cancelled — no changes made.', embeds: [], components: [] });
