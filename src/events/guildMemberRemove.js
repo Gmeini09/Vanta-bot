@@ -5,13 +5,15 @@ const settings = require('../utils/settings');
 module.exports = {
   name: Events.GuildMemberRemove,
   async execute(member) {
-    const id = settings.get(member.guild.id, 'leaveChannelId');
+    // Leaves are only logged for the team (mod logs), not in the public join channel.
+    const id = settings.get(member.guild.id, 'modLogChannelId');
     const channel = id && member.guild.channels.cache.get(id);
     if (!channel) return;
 
     const embed = new EmbedBuilder()
       .setColor(config.brand.danger)
-      .setDescription(`👋 **${member.user.tag}** left the server.\nWe're now **${member.guild.memberCount}** members.`)
+      .setTitle('📤 Member left')
+      .setDescription(`${member} — **${member.user.tag}** (\`${member.id}\`)\nMembers now: **${member.guild.memberCount}**`)
       .setThumbnail(member.user.displayAvatarURL({ size: 128 }))
       .setTimestamp();
 

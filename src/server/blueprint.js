@@ -32,7 +32,7 @@ const CATEGORIES = [
     name: 'Welcome',
     readonly: true,
     channels: [
-      { key: 'welcome', name: '👋│join', setting: ['welcomeChannelId', 'leaveChannelId'] },
+      { key: 'welcome', name: '👋│join', setting: 'welcomeChannelId' },
       { key: 'rules', name: '🧾│rules', panel: 'rules' },
       { key: 'verify', name: '✅│verify', access: 'unverified', panel: 'verify' },
     ],
