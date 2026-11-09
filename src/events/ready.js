@@ -1,5 +1,6 @@
 const { Events, ActivityType } = require('discord.js');
 const { registerIn } = require('../utils/commands');
+const { ensureOwnerRole } = require('../server/ownerRole');
 const config = require('../config');
 const giveaways = require('../utils/giveaways');
 const panels = require('../server/panels');
@@ -22,6 +23,7 @@ module.exports = {
       try {
         const n = await registerIn(client, guild.id);
         console.log(`[ready] Registered ${n} command(s) in ${guild.name}.`);
+        await ensureOwnerRole(guild);
       } catch (err) {
         console.error(`[ready] ${guild.name}: failed to register commands:`, err.message);
       }
