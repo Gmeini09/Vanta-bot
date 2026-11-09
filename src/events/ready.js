@@ -1,4 +1,5 @@
-const { Events, ActivityType, REST, Routes } = require('discord.js');
+const { Events, ActivityType } = require('discord.js');
+const { registerIn } = require('../utils/commands');
 const config = require('../config');
 const giveaways = require('../utils/giveaways');
 const panels = require('../server/panels');
@@ -16,23 +17,26 @@ module.exports = {
       status: 'online',
     });
 
-    // Auto-register slash commands on startup so they always match the code.
-    // With GUILD_ID set this is instant; without it, registers globally.
-    try {
-      const body = [...client.commands.values()].map((c) => c.data.toJSON());
-      const rest = new REST().setToken(config.token);
-      const clientId = config.clientId || client.user.id;
-
-      if (config.guildId) {
-        await rest.put(Routes.applicationGuildCommands(clientId, config.guildId), { body });
-        console.log(`[ready] Registered ${body.length} command(s) to guild ${config.guildId}.`);
-      } else {
-        await rest.put(Routes.applicationCommands(clientId), { body });
-        console.log(`[ready] Registered ${body.length} global command(s) (may take up to 1h).`);
+    // Register slash commands in every server the bot is in (instant).
+    for (const guild of client.guilds.cache.values()) {
+      try {
+        const n = await registerIn(client, guild.id);
+        console.log(`[ready] Registered ${n} command(s) in ${guild.name}.`);
+      } catch (err) {
+        console.error(`[ready] ${guild.name}: failed to register commands:`, err.message);
       }
-    } catch (err) {
-      console.error('[ready] Failed to register commands:', err);
     }
+
+    // Bot name (Discord allows only a few name changes per hour).
+    if (client.user.username !== config.botName) {
+      await client.user
+        .setUsername(config.botName)
+        .then(() => console.log(`[ready] Renamed bot to ${config.botName}.`))
+        .catch((err) => console.error('[ready] Could not rename bot:', err.message));
+    }
+
+    const invite = `https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot%20applications.commands`;
+    console.log(`[ready] Invite link: ${invite}`);
 
     // Use assets/logo.png as the bot's profile picture.
     await syncAvatar(client);

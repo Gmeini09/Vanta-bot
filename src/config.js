@@ -7,6 +7,9 @@ module.exports = {
   token: process.env.DISCORD_TOKEN,
   clientId: process.env.CLIENT_ID,
 
+  // Bot username (changed automatically on start if different).
+  botName: process.env.BOT_NAME || 'Vanta',
+
   // Optional: register slash commands to a single guild (instant) instead of
   // globally (can take up to 1h). Leave empty for global.
   guildId: process.env.GUILD_ID || '',
