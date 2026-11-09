@@ -9,4 +9,9 @@ async function registerIn(client, guildId) {
   return body.length;
 }
 
-module.exports = { registerIn };
+async function clearIn(client, guildId) {
+  const rest = new REST().setToken(config.token);
+  await rest.put(Routes.applicationGuildCommands(config.clientId || client.user.id, guildId), { body: [] });
+}
+
+module.exports = { registerIn, clearIn };

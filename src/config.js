@@ -10,6 +10,10 @@ module.exports = {
   // Bot username (changed automatically on start if different).
   botName: process.env.BOT_NAME || 'Vanta',
 
+  // The only server the bot works in. In every other server it stays a member
+  // but does nothing (no commands, no layout sync, no messages).
+  activeGuildId: process.env.ACTIVE_GUILD_ID || '1531989453168578650',
+
   // Optional: register slash commands to a single guild (instant) instead of
   // globally (can take up to 1h). Leave empty for global.
   guildId: process.env.GUILD_ID || '',

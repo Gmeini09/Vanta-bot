@@ -1,5 +1,6 @@
 const { Events, ActivityType } = require('discord.js');
-const { registerIn } = require('../utils/commands');
+const { registerIn, clearIn } = require('../utils/commands');
+const { isActiveGuild } = require('../utils/active');
 const { ensureOwnerRole } = require('../server/ownerRole');
 const config = require('../config');
 const giveaways = require('../utils/giveaways');
@@ -20,6 +21,11 @@ module.exports = {
 
     // Register slash commands in every server the bot is in (instant).
     for (const guild of client.guilds.cache.values()) {
+      if (!isActiveGuild(guild.id)) {
+        await clearIn(client, guild.id).catch(() => {});
+        console.log(`[ready] ${guild.name}: inactive (not the active server).`);
+        continue;
+      }
       try {
         const n = await registerIn(client, guild.id);
         console.log(`[ready] Registered ${n} command(s) in ${guild.name}.`);
@@ -49,6 +55,7 @@ module.exports = {
     // Bring every set-up server in line with the current layout (never deletes
     // anything) and refresh all posted panels with the latest texts.
     for (const guild of client.guilds.cache.values()) {
+      if (!isActiveGuild(guild.id)) continue;
       try {
         if (isManaged(guild)) {
           await syncGuildArt(guild);
@@ -69,6 +76,7 @@ module.exports = {
     if (sale.isActive()) {
       setTimeout(async () => {
         for (const guild of client.guilds.cache.values()) {
+          if (!isActiveGuild(guild.id)) continue;
           const n = await panels.refreshAll(guild).catch(() => 0);
           if (n) console.log(`[sale] ${guild.name}: sale ended, post removed.`);
         }

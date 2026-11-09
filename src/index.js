@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 const config = require('./config');
+const { isActiveGuild, guildOf } = require('./utils/active');
 
 if (!config.token) {
   console.error('[fatal] DISCORD_TOKEN is missing. Set it as an environment variable.');
@@ -43,10 +44,14 @@ function createClient(withMessageContent) {
   client.hasMessageContent = withMessageContent;
 
   for (const event of events) {
-    const handler = (...args) =>
-      Promise.resolve(event.execute(...args, client)).catch((err) =>
+    const handler = (...args) => {
+      // Ignore everything that happens in servers other than the active one.
+      const gid = guildOf(args[0]);
+      if (gid && !isActiveGuild(gid)) return;
+      return Promise.resolve(event.execute(...args, client)).catch((err) =>
         console.error(`[event:${event.name}]`, err),
       );
+    };
     if (event.once) client.once(event.name, handler);
     else client.on(event.name, handler);
   }
