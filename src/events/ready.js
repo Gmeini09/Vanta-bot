@@ -57,5 +57,16 @@ module.exports = {
         console.error(`[sync] ${guild.name} failed:`, err);
       }
     }
+
+    // Remove the discount post as soon as the sale ends.
+    const sale = require('../handlers/sale');
+    if (sale.isActive()) {
+      setTimeout(async () => {
+        for (const guild of client.guilds.cache.values()) {
+          const n = await panels.refreshAll(guild).catch(() => 0);
+          if (n) console.log(`[sale] ${guild.name}: sale ended, post removed.`);
+        }
+      }, sale.endsAt() - Date.now() + 5000);
+    }
   },
 };

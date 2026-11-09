@@ -3,11 +3,13 @@
 const store = require('../utils/store');
 
 const NAME = 'panels';
-const MARKERS = { rules: ['rules_accept'], tickets: ['ticket_select', 'ticket_open'], verify: [], 'plan-private': [], 'plan-public': [] };
+const MARKERS = { rules: ['rules_accept'], tickets: ['ticket_select', 'ticket_open'], verify: [], 'plan-private': [], 'plan-public': [], sale: [] };
 
 const hasMarker = (m, type) =>
   type === 'verify'
     ? require('../handlers/verify').isVerifyPanel(m)
+    : type === 'sale'
+    ? require('../handlers/sale').isSalePanel(m)
     : type.startsWith('plan-')
     ? require('../handlers/plans').isPlanPanel(type.slice(5))(m)
     : m.components.some((row) => row.components?.some((c) => MARKERS[type].includes(c.customId)));
@@ -21,6 +23,7 @@ function build(type, guild) {
   if (type === 'rules') return require('../handlers/rules').buildRulesPanel(guild);
   if (type === 'tickets') return require('../tickets/manager').buildPanel(guild);
   if (type === 'verify') return require('../handlers/verify').buildVerifyPanel(guild);
+  if (type === 'sale') return require('../handlers/sale').buildSalePanel(guild);
   if (type.startsWith('plan-')) return require('../handlers/plans').buildPlanPanel(type.slice(5), guild);
   return null;
 }
@@ -79,6 +82,13 @@ async function ensure(guild, type, channel) {
   let message = entry ? await channel.messages.fetch(entry.messageId).catch(() => null) : null;
   if (!message) message = await findExisting(channel, type);
 
+  // Nothing to show (e.g. the sale ended): remove the old post.
+  if (!payload) {
+    if (message) await message.delete().catch(() => {});
+    if (entry) unregister(guild.id, type, entry.messageId);
+    return null;
+  }
+
   if (message && repostOnly(type)) {
     if (upToDate(message, payload)) {
       register(guild.id, type, channel.id, message.id);
@@ -113,6 +123,12 @@ async function refreshAll(guild) {
       const message = channel && (await channel.messages.fetch(e.messageId).catch(() => null));
       if (!message) {
         unregister(guild.id, type, e.messageId);
+        continue;
+      }
+      if (!build(type, guild)) {
+        await message.delete().catch(() => {});
+        unregister(guild.id, type, e.messageId);
+        count++;
         continue;
       }
       if (repostOnly(type)) {
