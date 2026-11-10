@@ -5,7 +5,6 @@ module.exports = {
   versions: [
     { key: 'public', label: 'Public', emoji: '🛒', description: 'Public version' },
     { key: 'private', label: 'Private', emoji: '🛒', description: 'Private version' },
-    { key: 'kernel', label: 'Kernel', emoji: '🛒', description: 'Kernel version' },
   ],
   durations: [
     { key: '1m', label: '1 Month' },
