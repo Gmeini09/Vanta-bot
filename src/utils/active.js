@@ -1,6 +1,6 @@
 const config = require('../config');
 
-const isActiveGuild = (guildId) => !config.activeGuildId || guildId === config.activeGuildId;
+const isActiveGuild = (guildId) => !config.activeGuildIds.length || config.activeGuildIds.includes(guildId);
 
 // Finds the guild an event belongs to (member, message, reaction, interaction, channel, guild).
 function guildOf(arg) {
