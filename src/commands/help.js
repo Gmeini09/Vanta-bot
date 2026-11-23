@@ -11,7 +11,7 @@ const CATEGORIES = {
   ],
   '🎉 Fun': ['/giveaway'],
   '📢 Staff': ['/say', '/embed'],
-  '⚙️ Admin': ['/settings', '/sync-server', '/setup-server'],
+  '⚙️ Admin': ['/settings', '/sync-server', '/setup-server', '/delete-bot-channels'],
 };
 
 module.exports = {

@@ -5,8 +5,7 @@ const { ensureOwnerRole } = require('../server/ownerRole');
 const config = require('../config');
 const giveaways = require('../utils/giveaways');
 const panels = require('../server/panels');
-const { syncAvatar, syncGuildArt } = require('../utils/logo');
-const { syncServer, isManaged } = require('../server/sync');
+const { syncAvatar } = require('../utils/logo');
 
 module.exports = {
   name: Events.ClientReady,
@@ -52,22 +51,15 @@ module.exports = {
     // Pick up giveaways that were running before a restart.
     giveaways.resumeAll(client);
 
-    // Bring every set-up server in line with the current layout (never deletes
-    // anything) and refresh all posted panels with the latest texts.
+    // Refresh panels the bot already posted (texts/prices). The server layout
+    // itself is never built or changed on start — only /setup-server does that.
     for (const guild of client.guilds.cache.values()) {
       if (!isActiveGuild(guild.id)) continue;
       try {
-        if (isManaged(guild)) {
-          await syncGuildArt(guild);
-          const { report } = await syncServer(guild);
-          console.log(
-            `[sync] ${guild.name}: ${report.created.length} created, ${report.updated.length} updated, ${report.panels.length} panel(s)`,
-          );
-        }
         const refreshed = await panels.refreshAll(guild);
         if (refreshed) console.log(`[panels] ${guild.name}: refreshed ${refreshed} panel(s)`);
       } catch (err) {
-        console.error(`[sync] ${guild.name} failed:`, err);
+        console.error(`[panels] ${guild.name} failed:`, err);
       }
     }
 

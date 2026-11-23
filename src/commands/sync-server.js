@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const config = require('../config');
-const { syncServer } = require('../server/sync');
+const { syncServer, isManaged } = require('../server/sync');
 
 const list = (items) => (items.length ? items.map((i) => `• ${i}`).join('\n').slice(0, 1024) : '—');
 
@@ -14,6 +14,12 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
+    if (!isManaged(interaction.guild)) {
+      return interaction.reply({
+        content: '❌ This server was not set up with `/setup-server`, so there is no layout to update.',
+        flags: MessageFlags.Ephemeral,
+      });
+    }
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const resetPermissions = interaction.options.getBoolean('reset_permissions') ?? false;
     const { report } = await syncServer(interaction.guild, { resetPermissions });
