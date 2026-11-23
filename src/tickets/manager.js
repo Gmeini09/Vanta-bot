@@ -13,7 +13,6 @@ const {
 } = require('discord.js');
 const config = require('../config');
 const store = require('../utils/store');
-const created = require('../utils/created');
 const settings = require('../utils/settings');
 const CATEGORIES = require('./categories');
 const PRODUCTS = require('./products');
@@ -278,7 +277,6 @@ async function createTicket(interaction, cat, answers) {
     permissionOverwrites: overwrites,
     reason: `Ticket opened by ${user.tag}`,
   });
-  created.add(guild.id, channel.id);
 
   setMeta(channel.id, {
     guildId: guild.id,

@@ -11,10 +11,9 @@ const config = require('../config');
 const settings = require('../utils/settings');
 const panels = require('../server/panels');
 const { syncServer, clearLayout } = require('../server/sync');
-const { syncGuildArt } = require('../utils/logo');
 
 // Full reset: deletes everything, then builds the layout from src/server/blueprint.js.
-// This is the only thing that builds the layout; the bot never does it on its own.
+// For updates without deleting anything, use /sync-server (also runs on every bot start).
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setup-server')
@@ -34,7 +33,8 @@ module.exports = {
       .setDescription(
         'This will **delete every channel** and **every role I can manage**, then rebuild the server.\n\n' +
           '**This cannot be undone.**\n\n' +
-          '💡 Just want to update the layout? Use `/sync-server` instead — it never deletes anything.',
+          '💡 Just want to update the layout? Use `/sync-server` instead — it never deletes anything ' +
+          'and also runs automatically every time the bot starts.',
       );
     const buttons = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId('setup_confirm').setLabel('Yes, reset everything').setStyle(ButtonStyle.Danger),
@@ -86,7 +86,6 @@ module.exports = {
     panels.clearGuild(guild.id);
     settings.set(guild.id, { autoRoleId: '' }); // Member role comes from accepting the rules
     const { report, roles, mainChannel } = await syncServer(guild, { resetPermissions: true });
-    await syncGuildArt(guild);
     log.push(`✨ Created **${report.created.length}** roles/categories/channels`);
     if (report.panels.length) log.push(`📌 ${report.panels.join('\n📌 ')}`);
     log.push('⚙️ Settings saved (welcome, logs, tickets, verified role)');
@@ -98,7 +97,7 @@ module.exports = {
       .setColor(config.brand.success)
       .setTitle('✅ Server setup complete')
       .setDescription(log.join('\n'))
-      .setFooter({ text: 'Use /sync-server to apply later layout updates.' })
+      .setFooter({ text: 'From now on the bot keeps the layout up to date automatically.' })
       .setTimestamp();
     await interaction.editReply({ content: '', embeds: [summary], components: [] }).catch(() => {});
 

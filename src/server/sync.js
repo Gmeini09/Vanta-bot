@@ -5,7 +5,6 @@ const { ChannelType } = require('discord.js');
 const store = require('../utils/store');
 const settings = require('../utils/settings');
 const panels = require('./panels');
-const created = require('../utils/created');
 const { ROLES, CATEGORIES, REMOVED, overwritesFor } = require('./blueprint');
 
 const LAYOUT = 'layout';
@@ -25,9 +24,16 @@ function clearLayout(guildId) {
   store.write(LAYOUT, d);
 }
 
-// A guild is "managed" only after /setup-server was run there.
+// A guild is "managed" if it was set up before, or already has at least two
+// of the blueprint categories (adopts servers built by an older version).
 function isManaged(guild) {
-  return Object.keys(getLayout(guild.id).categories).length > 0;
+  const layout = getLayout(guild.id);
+  if (Object.keys(layout.categories).length) return true;
+  const names = new Set(CATEGORIES.map((c) => c.name.toLowerCase()));
+  const found = guild.channels.cache.filter(
+    (c) => c.type === ChannelType.GuildCategory && names.has(c.name.toLowerCase()),
+  );
+  return found.size >= 2;
 }
 
 const sameName = (channel, name, type) =>
@@ -101,10 +107,7 @@ async function syncServer(guild, { resetPermissions = false } = {}) {
       parent = await guild.channels
         .create({ name: cat.name, type: ChannelType.GuildCategory, permissionOverwrites: catOverwrites, reason: 'Vanta sync' })
         .catch(() => null);
-      if (parent) {
-        report.created.push(`category ${cat.name}`);
-        created.add(guild.id, parent.id);
-      }
+      if (parent) report.created.push(`category ${cat.name}`);
     } else {
       if (parent.name !== cat.name) {
         parent.setName(cat.name).catch(() => {});
@@ -129,10 +132,7 @@ async function syncServer(guild, { resetPermissions = false } = {}) {
         channel = await guild.channels
           .create({ name: ch.name, type, parent: parent.id, permissionOverwrites: overwrites, reason: 'Vanta sync' })
           .catch(() => null);
-        if (channel) {
-          report.created.push(`channel ${ch.name}`);
-          created.add(guild.id, channel.id);
-        }
+        if (channel) report.created.push(`channel ${ch.name}`);
       } else {
         if (!sameName(channel, ch.name, type)) {
           channel.setName(ch.name).catch(() => {});
